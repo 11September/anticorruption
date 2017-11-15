@@ -1,9 +1,5 @@
 <?php
 
-Route::group(['prefix' => 'admin'], function () {
-    Voyager::routes();
-});
-
 Route::get('/', 'ObjectsController@index')->name('welcome');
 Route::post('/filter', 'ObjectsController@filter')->name('filter');
 
@@ -30,16 +26,10 @@ Route::post('/remove_finances', 'FinancesController@delete')->middleware('auth' 
 /* Middleware Admin end */
 
 
-
-//delete after
 //Auth::routes();
-
-//Route::get('/home', 'HomeController@index')->name('home');
-
-Route::get('/redirect/{provider}/{objectId}', 'SocialAuthController@redirect');
-Route::get('/callback/{provider}', 'SocialAuthController@callback');
-
-Route::post('/remove_comment', 'CommentsController@delete')->middleware('auth', 'isAdmin');
-
 //Route::get('/api', 'PagesController@api')->name('api');
 //Route::get('/instruction', 'PagesController@instruction')->name('instruction');
+
+Route::group(['prefix' => 'admin'], function () {
+    Voyager::routes();
+});

@@ -41,20 +41,9 @@ class ObjectsController extends Controller
 
         $suma = Object::sumaRepairs($ids);
 
-        $regions = collect(Object::distinct('region_id')->pluck('region_id'));
-        $regionContainsObjectsAmount = [];
-        $regionClustersCoords = [];
+//        $regionContainsObjectsAmount = collect(Region::countRelatedObjects($objects));
 
-        foreach ($regions as $regionId) {
-            $regionContainsObjectsAmount[$regionId] = Object::where( "region_id", "=", $regionId )->whereNotNull('maps_lat')->whereNotNull('maps_lng')->count();
-            $regionClustersCoords[$regionId] = Region::select('map_lat','map_lng')->where('id', $regionId)->get()->toArray();
-        }
-
-        $regionClustersCoords = collect( $regionClustersCoords );
-        $regionContainsObjectsAmount = collect( $regionContainsObjectsAmount );
-        // $regionContainsObjectsAmount = collect(Region::countRelatedObjects($objects));
-
-        return view('welcome', compact('objects', 'suma', 'regionContainsObjectsAmount', 'regionClustersCoords', 'filteredByCity'));
+        return view('welcome', compact('objects', 'suma', 'regionContainsObjectsAmount', 'filteredByCity'));
     }
 
     public function filter(Request $request)
@@ -539,8 +528,8 @@ class ObjectsController extends Controller
                     $object->customer_id = $newObjectCustomer_id;
                     $object->contractor_id = $newObjectContractor_id;
                     $object->region_id = $newObjectRegion_id;
-                    $object->price = strlen($objectData['updateObject']) > 0 ? $newFinanceSuma + $object->price : $newFinanceSuma;
-                    $object->work_description = strlen($objectData['updateObject']) > 0 ? $object->work_description . ' ' . $newObjectWork_description : $newObjectWork_description;
+                    $object->price = strlen($objectData['updateObject']) ? $newFinanceSuma + $object->price : $newFinanceSuma;
+                    $object->work_description = strlen($objectData['updateObject']) ? $object->work_description . ' ' . $newObjectWork_description : $newObjectWork_description;
                     $object->finished_at = $newObjectFinished_at;
                     $object->finished_year = $newObjectFinished_year;
 

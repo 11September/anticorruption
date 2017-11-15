@@ -27,7 +27,7 @@
                         <div class="single-select first-select">
                             <label class="select-label" for="">Категорія</label>
      
-                            <select data-live-search="true" title="Категорія"
+                            <select id="categoriya" data-live-search="true" title="Категорія"
                                     class="selectpicker show-menu-arrow form-control" name="category_id[]"
                                     multiple="multiple">
                                
@@ -139,7 +139,7 @@
 
                         </div>
                         <div class="col-lg-4 col-md-4 col-sm-12 year-block no-pad">
-                            <div class="years-filter">
+                            <div class="years-filter single-select">
                                 <label class="visible-xs visible-sm" for="">Рік</label>                                
                                     
                                 <select title="Рік"

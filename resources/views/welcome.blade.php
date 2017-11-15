@@ -1,95 +1,794 @@
-<!doctype html>
-<html lang="{{ app()->getLocale() }}">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('partials.master')
 
-        <title>Laravel</title>
+@section('css')
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css"
+          rel="stylesheet">
+@endsection
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+@section('title'){{ Voyager::setting('title') }}@endsection
+@section('description'){{ Voyager::setting('description') }}@endsection
 
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Raleway', sans-serif;
-                font-weight: 100;
-                height: 100vh;
-                margin: 0;
-            }
+@section('facebookCommentsModerator')
+    <meta property="og:url" content="https://map.shtab.net/" />
+    <meta property="og:title" content="Map shtab" />
+    <meta property="og:description" content="Map shtab project" />
+    <meta property="og:image" content="https://www.facebook.com/images/fb_icon_325x325.png" />
+    <meta property="og:type" content="website" />
 
-            .full-height {
-                height: 100vh;
-            }
+    {{--<meta property="fb:admins" content="100004911010171"/>--}}
+    {{--<meta property="fb:admins" content="100005514735414"/>--}}
+    <meta property="fb:app_id" content="1509381815774111"/>
+@endsection
 
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
+@section('content')
 
-            .position-ref {
-                position: relative;
-            }
+    @include('partials.nav')
 
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
+    <div id="left-sidebar" class="col-lg-30  sidebar sidebar-close slide-down">
+        @include('partials.sidebar')
+    </div>
 
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 12px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @auth
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ route('login') }}">Login</a>
-                        <a href="{{ route('register') }}">Register</a>
-                    @endauth
-                </div>
-            @endif
-
-            <div class="content">
-                <div class="title m-b-md">
-                    Laravel
-                </div>
-
-                <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
-            </div>
+    <div class="col-lg-12 col-md-12 col-md-12  no-pad">
+        <div id="map" class="map-body">
         </div>
-    </body>
-</html>
+    </div>
+
+
+    @include('partials.modalExportObjects')
+    {{--@include('partials.modalRegisterDisquis')--}}
+
+
+@endsection
+
+@section('scripts')
+
+    <script defer
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs&callback=initMap">
+    </script>
+    <!-- my key -> AIzaSyAECoGPJKuBmmc4_Y0PjKkWRLUjheLqwAI -->
+    <!-- anticor off key -> AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+    <script defer src="{{ URL::asset('js/markers_with_label.js') }}" type="text/javascript"></script>
+    @include('partials.autocomplete')
+
+    <style>
+        .labels {
+            text-align: center;
+            width: 40px;
+            height: 50px;
+            margin-left: -20px !important;
+            margin-top: -50px !important;
+            padding-top: 9px;
+            font-size: 14px;
+            font-weight: bold;
+            color: dimgrey;
+        }
+    </style>
+
+    <script>
+
+        var pathToImages = "{{ asset('storage') }}";        
+
+        var map;
+        var objects = {!! $objects !!};
+        {{--var regionContainsObjectsAmount = {!! $regionContainsObjectsAmount !!};--}}
+        var moneysAmount = {!! $suma !!};
+        var filteredByCity = {!! $filteredByCity !!};
+
+        function initMap() {
+
+            var mapZoom = 6;
+            var mapCenter = {lat: 49.03806488, lng: 31.4511323};
+            
+            var markers, locations = [], center, infoWindows = [], local_markers = [];
+
+            for (var j = 0; j < objects.length; j++) {
+                locations.push({
+                    lat: parseFloat(objects[j].maps_lat),
+                    lng: parseFloat(objects[j].maps_lng)
+                });
+            }
+
+            if (objects.length == 1) {
+                mapZoom = 18;
+                mapCenter = new google.maps.LatLng(objects[0].maps_lat, objects[0].maps_lng);
+                loadObjectInformation(objects[0].id);
+            }
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                zoom: mapZoom,
+                center: mapCenter,
+                zoomControl: true,
+                mapTypeControl: false,
+                fullscreenControl: false,
+                rotateControl: false,
+                streetViewControl: false
+            });
+
+            if(navigator.geolocation){
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var pos = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+
+                    map.setCenter(pos);
+                    map.setZoom(15);
+                });
+            }
+
+            var oms = new OverlappingMarkerSpiderfier(map, { 
+                markersWontMove: true, 
+                markersWontHide: true,
+                basicFormatEvents: true
+            });
+
+            markers = locations.map(function (location, i) {
+                
+                var objectImage = objects[i].category ? objects[i].category.image : "{{ asset('img/markers/cluster.png') }}";
+
+                var image = new google.maps.MarkerImage(
+                    pathToImages + "/" + objectImage,
+                    null,
+                    null,
+                    null,
+                    new google.maps.Size(50, 50)
+                );
+
+                var marker = new google.maps.Marker({
+                    position: location,
+                    icon: image,
+                    name: objects[i].name,
+                    address: objects[i].address,
+                    objectId: objects[i].id,
+                });
+
+                google.maps.event.addListener(marker, 'spider_click', function () {
+
+                    var object_id = marker.objectId;
+
+                    loadObjectInformation(object_id);
+
+                    $(".objects-table").css("display", '');
+                    $(".sidebar-controller").addClass("slide-width");
+                    $(".arrow-left").addClass("hide");
+                    $(".arrow-right").removeClass("hide");
+                    $(".sidebar-controller").toggleClass("slide-width");
+
+                    $(".sidebar-body").removeClass("height-69");
+                    $("#scroll-part").removeClass("zero-height");
+                    $("#left-sidebar").removeClass("slide-down");
+
+                    $(".down-obj").addClass("hide");
+                    $(".up-obj").removeClass("hide");
+
+                });
+
+                return marker;
+            });
+
+            var markersInCluster = [];
+            var clusterMarkers = [];
+            var markerBounds;
+            var clusterBounds;
+
+            var overlay = new google.maps.OverlayView();
+            overlay.draw = function () {
+            };
+            overlay.setMap(map);
+
+            function createCluster(_position, _contains, _containsAmount){
+
+                var clusterImagePath = "{{ asset('img/markers/cluster.png') }}";
+
+                var clusterImage = new google.maps.MarkerImage(
+                    clusterImagePath,
+                    null,
+                    null,
+                    null,
+                    new google.maps.Size(50, 50)
+                );
+
+                var cluster = new MarkerWithLabel({
+                    position: _position,
+                    map: map,
+                    icon: clusterImage,
+                    contains: _contains,
+                    labelClass: "labels",
+                    labelContent: _containsAmount,
+                    labelAnchor: new google.maps.Point(4, 35),
+                    labelInBackground: false,
+                });
+
+                return cluster;
+
+            }
+
+            function clusterization() {
+                var nextmarker;
+
+                $.each(clusterMarkers, function( i, clus ) {
+                    clus.setMap(null);
+                });
+
+                markersInCluster = [];
+                clusterMarkers = [];
+                markerBounds = null;
+                clusterBounds = null;
+
+                var clusterBounds = new google.maps.LatLngBounds();
+
+                var projection = overlay.getProjection();
+
+                function createAnglePoints(_marker) {
+
+                    var tr = new google.maps.LatLng(_marker.getPosition().lat(), _marker.getPosition().lng());
+                    var bl = new google.maps.LatLng(_marker.getPosition().lat(), _marker.getPosition().lng());
+
+                    var trPix = projection.fromLatLngToDivPixel(tr);
+                    trPix.x += 60;
+                    trPix.y -= 60;
+
+                    var blPix = projection.fromLatLngToDivPixel(bl);
+                    blPix.x -= 60;
+                    blPix.y += 60;
+
+                    var ne = projection.fromDivPixelToLatLng(trPix);
+                    var sw = projection.fromDivPixelToLatLng(blPix);
+
+                    var nesw = [sw, ne];
+
+                    return nesw;
+                }
+
+                $.each(markers, function( i, marker ) {
+
+                    var contains = [];
+
+                    var nesw = createAnglePoints(marker);
+                    markerBounds = new google.maps.LatLngBounds(nesw[0], nesw[1]);
+
+                    clusterBounds = markerBounds;
+
+                    if (markers[i + 1] || markers.length == 1) {
+
+                        $.each(markers, function( i, nextmarker ) {
+
+                            nextmarker.setMap(map);
+                            oms.addMarker(marker);
+
+                            if (markersInCluster.indexOf(marker) == -1 && markersInCluster.indexOf(nextmarker) == -1 && nextmarker.getPosition() !== marker.getPosition() && clusterBounds.contains(nextmarker.getPosition()) && map.getZoom() < 22 ) {
+
+                                if (markersInCluster.indexOf(marker) == -1) {
+                                    markersInCluster.push(marker);
+                                }
+                                if (markersInCluster.indexOf(nextmarker) == -1) {
+                                    markersInCluster.push(nextmarker);
+                                }
+
+                                var nesw = createAnglePoints(nextmarker);
+
+                                clusterBounds.extend(nesw[1]);
+                                clusterBounds.extend(nesw[0]);
+
+                                contains.push(marker);
+                                contains.push(nextmarker);
+                                var containsAmount = contains.length.toString();
+
+                                var iconSize = new google.maps.Size((contains.length * 1.8 + 50), (contains.length * 1.8 + 50));
+
+                                cluster = createCluster( clusterBounds.getCenter(), contains, containsAmount );
+
+                                if (clusterMarkers.indexOf(cluster) == -1) {
+                                    clusterMarkers.push(cluster);
+                                }
+                            }
+                        });
+                    }
+                });
+
+                $.each(markersInCluster, function( i, m ) {
+                    m.setMap(null);
+                });
+
+                var j = 0;
+                
+                while (clusterMarkers[j]) {
+
+                    cluster = clusterMarkers[j];
+
+                    contains = [];
+                    
+                    if ( cluster ){
+                        var nesw = createAnglePoints(cluster);
+                        clusterBounds = new google.maps.LatLngBounds(nesw[0], nesw[1]);
+                    }
+
+                    if (clusterMarkers.length !== 1) {
+
+                        $.each(clusterMarkers, function( i, _cluster ) {
+                            nextCluster = _cluster;
+
+
+                            if( nextCluster ) {
+
+                                if (clusterBounds.contains(nextCluster.getPosition()) && nextCluster.getPosition() !== cluster.getPosition()) {
+
+                                    j = 0;
+
+                                    var nesw = createAnglePoints(nextCluster);
+
+                                    clusterBounds.extend(nesw[1]);
+                                    clusterBounds.extend(nesw[0]);
+
+                                    nextCluster.setMap(null);
+
+                                    var clusterInArr = clusterMarkers.indexOf(cluster);
+                                    if (clusterInArr >= 0) {
+                                        clusterMarkers[clusterInArr].setMap(null);
+                                        clusterMarkers.splice(clusterInArr, 1);
+                                    }
+
+                                    var nextClusterInArr = clusterMarkers.indexOf(nextCluster);
+                                    if (nextClusterInArr >= 0) {
+                                        clusterMarkers[nextClusterInArr].setMap(null);
+                                        clusterMarkers.splice(nextClusterInArr, 1);
+                                    }
+
+                                    contains = cluster.contains;
+                                    $.each(nextCluster.contains, function( i, markerIn ) {
+                                        contains.push(markerIn);
+                                    });
+
+                                    containsAmount = contains.length.toString();
+                                    var iconSize = new google.maps.Size((contains.length * 1.8 + 50), (contains.length * 1.8 + 50));
+
+                                    cluster = createCluster( clusterBounds.getCenter(), contains, containsAmount );
+
+                                    if (clusterMarkers.indexOf(cluster) == -1) {
+                                        clusterMarkers.push(cluster);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    j++;
+                }
+
+                $.each(markers, function( i, marker ) {
+
+                    $.each(clusterMarkers, function( i, cluster ) {
+
+                        contains = [];
+
+                        var nesw = createAnglePoints(cluster);
+                        clusterBounds = new google.maps.LatLngBounds(nesw[0], nesw[1]);
+
+                        if (clusterBounds.contains(marker.getPosition()) && markersInCluster.indexOf(marker) == -1) {
+
+                            var nesw = createAnglePoints(marker);
+
+                            clusterBounds.extend(nesw[1]);
+                            clusterBounds.extend(nesw[0]);
+
+                            marker.setMap(null);
+
+                            markersInCluster.push(marker);
+
+                            var clusterInArr = clusterMarkers.indexOf(cluster);
+                            if (clusterInArr >= 0) {
+                                clusterMarkers[clusterInArr].setMap(null);
+                                clusterMarkers.splice(clusterInArr, 1);
+                            }
+
+                            contains = cluster.contains;
+                            contains.push(marker);
+                            containsAmount = contains.length.toString();
+                            var iconSize = new google.maps.Size((contains.length * 1.8 + 50), (contains.length * 1.8 + 50));
+
+                            cluster = createCluster( clusterBounds.getCenter(), contains, containsAmount );
+
+                            if (clusterMarkers.indexOf(cluster) == -1) {
+                                clusterMarkers.push(cluster);
+                            }
+                        }
+                    });                   
+
+                });
+    
+                $.each(clusterMarkers, function( i, cluster ) {
+
+                    google.maps.event.addListener(cluster, 'click', function () {
+              
+                        bounds = new google.maps.LatLngBounds();
+
+                        var mapOldZoom = map.getZoom();
+
+                        $.each(this.contains, function( i, marker ) {
+                            bounds.extend(marker.getPosition());
+                        });
+                        map.fitBounds(bounds);
+                        map.setCenter(bounds.getCenter());
+                        
+                        if(mapOldZoom == map.getZoom()){
+                            map.setZoom(mapOldZoom + 2);
+                        }
+                        clusterization();
+                    });
+                });
+            }
+
+            var regionClusters = [];
+
+            google.maps.event.addListener(map, 'idle', function () {                
+                regionClusterization();
+            });
+
+            google.maps.event.addListener(map, 'zoom_changed', function (){
+                if (map.getZoom() < 3) { map.setZoom(3) };
+            });
+
+            function regionClusterization() {
+                $.each(regionClusters, function( i, regClus ) {
+                    regClus.setMap(null);
+                });
+
+                if( filteredByCity ){ 
+                    clusterization();
+                    return;
+                }
+
+                regionClusters = [];
+                var regionClustersCoords = [];
+
+                if (map.getZoom() < 7) {
+
+                    $.each(markers, function( i, marker ) {
+                        marker.setMap(null);
+                    });
+                    $.each(clusterMarkers, function( i, cluster ) {
+                        cluster.setMap(null);
+                    });
+
+                    $.each(objects, function( i, object ) {
+
+                        var coords = JSON.stringify(new google.maps.LatLng(object.region.map_lat, object.region.map_lng));
+
+                        if (regionClustersCoords.indexOf(coords) == -1) {
+                            regionClustersCoords.push(coords);
+
+                            var regionContains = regionContainsObjectsAmount[object.region.id].toString();
+
+                            var regionCluster = createCluster( JSON.parse(coords), regionContains, regionContains );
+
+                            regionClusters.push(regionCluster);
+
+                            $.each(regionClusters, function( i, cl ) {
+
+                                google.maps.event.addListener(regionCluster, 'click', function () {
+
+                                    map.setZoom(8);
+                                    map.setCenter(cl.getPosition());
+
+                                    $.each(regionClusters, function( i, regClus ) {
+                                        regClus.setMap(null);
+                                    });
+
+                                    clusterization();
+
+                                });
+                            });
+                        }
+                    });
+                } else {
+                    clusterization();
+                }
+            }
+        }
+
+        function hideInfo() {
+            $('#object-one-list').empty();
+            $('#comments-part').empty();
+            $('#object-all-list').empty();
+            $(".selected-object-label").addClass("hide");
+            $('.list-objects-label').removeClass("hide");
+            var moneyPrefix = '', moneysAmountFormatted;
+            if(moneysAmount < 1000000){
+                moneysAmountFormatted = parseInt(moneysAmount / 1000);
+                moneyPrefix = ' тис.';
+            }else if(moneysAmount < 1000000000){
+                moneysAmountFormatted = parseInt(moneysAmount / 1000000);
+                moneyPrefix = ' млн.';
+            }else if(moneysAmount < 1000000000000){
+                moneysAmountFormatted = parseInt(moneysAmount / 1000000000);
+                moneyPrefix = ' млрд.';
+            }else { 
+                moneysAmountFormatted = 'Більше трильйона';
+            }
+
+            $(".money-indicator").text(moneysAmountFormatted + moneyPrefix);
+
+            $('.pagination-links-div').removeClass('hide');
+
+            sidebarObjectsAmount($('.disabled-link').text());
+        }
+
+        function sidebarObjectsAmount(amount) {
+            $("#object-all-list").empty();
+
+            if (amount > objects.length) {
+                amount = objects.length;
+            }
+
+            if (amount < 10) {
+                $('.pagination-links-div').addClass('hide');
+            }
+
+            for (var i = 0; i < amount; i++) {
+
+                var formattedPrice = parseInt(objects[i].price / 1000);
+                var objectImage = objects[i].category.image ? objects[i].category.image : "{{ asset('img/markers/cluster.png') }}";
+
+                $("#object-all-list").append(
+                    '<span class="list-item-flex">' +
+                    '<input class="hiidenIdObject" type="hidden" value=' + objects[i].id + '>' +
+                    '<img class="image" src="' + pathToImages + "/" + objects[i].category.image +'" alt="">' +
+                    '<div class="object-info">' +
+                    '<span class="object-info-p">' + objects[i].name + '</span>' +
+                    '<span class="object-info-p">' + objects[i].address + '</span>' +
+                    '<span class="object-info-p">Сплачено ' + formattedPrice + ' тис. грн.</span>' +
+                    '<span class="hide lat">' + objects[i].maps_lat + '</span>' +
+                    '<span class="hide lng">' + objects[i].maps_lng + '</span>' +
+                    '</div>' +
+                    '</span>'
+                );
+            }
+        }
+
+        function loadObjectInformation(object_id) {
+            $('.pagination-links-div').addClass('hide');
+
+            $.ajax({
+                type: 'GET',
+                url: '/get-object',
+                data: {id: object_id},
+                success: function (object) {
+
+                    var time, comment, name;
+
+                    $('#object-one-list').empty();
+                    $('#comments-part').empty();
+                    $('#object-all-list').empty();
+
+                    $(".money-indicator").text(parseInt(object[0].price / 1000) + ' тис.');
+
+                    if ('name' in object[0]) {
+                        $('#object-one-list').append(
+                            '<li>' +
+                            '<p class="object-name">Назва</p>' +
+                            '<p class="object-description">' + object[0].name + '</p>' +
+                            '</li>'
+                        );
+                    }
+
+                    if ('address' in object[0]) {
+                        $('#object-one-list').append(
+                            '<li>' +
+                            '<p class="object-name">Адреса</p>' +
+                            '<p id="object-adress" class="object-description">' + object[0].address + '</p>' +
+                            '</li>'
+                        );
+                    }
+                    if (object[0]['customer'] !== null) {
+                        if ('name' in object[0]['customer']) {
+                            $('#object-one-list').append(
+                                '<li>' +
+                                '<p class="object-name">Замовник</p>' +
+                                '<p id="object-customer" class="object-description">' + object[0]['customer'].name + '</p>' +
+                                '</li>'
+                            );
+                        }
+                    }
+
+                    if (object[0]['contractor'] !== null) {
+                        if ('name' in object[0]['contractor']) {
+                            $('#object-one-list').append(
+                                '<li>' +
+                                '<p class="object-name">Підрядник</p>' +
+                                '<p id="object-contractor" class="object-description">' + object[0]['contractor'].name + '</p>' +
+                                '</li>'
+                            );
+                        }
+                    }
+
+                    if ('work_description' in object[0]) {
+                        $('#object-one-list').append(
+                            '<li class="work-description-block">' +
+                            '<p class="object-name">Перелік робіт</p>' +
+                            '<p id="object-work-description" class="object-description work-description">' + object[0].work_description + '</p>' +
+                            '</li>'
+                        );
+                    }
+
+                    if (object[0].documents.length > 0) {
+
+                        $('#object-one-list').append('<li class="document-part"><p class="object-name">Додаткові документи</p></li>');
+
+                        $.each(object[0].documents, function( i, objectDoc ) {
+
+                            $('.document-part').append(
+                                '<a target="_blank" href="' + objectDoc.file_path + '">' + objectDoc.title + '</a>'
+                            );
+
+                        });
+                    }
+                    var objectSum = 0;
+                    var status = 'Сплачено';
+
+                    $('#object-one-list').append('<li class="finances-part"><p class="object-name">Фiнансування</p></li>');
+
+                    if( 'finances' in object[0] && object[0].finances.length > 0) {
+                        $.each(object[0].finances, function( i, objectFin ) {
+                        
+                            objectSum += objectFin.suma;
+                        
+                            if(objectFin.status == "paid"){
+                                status = 'Сплачено';
+                            }
+                            else if (objectFin.status == "provided") {
+                                status = 'Передбачено';
+                            }
+                            else {
+                            }
+                            $('.finances-part').append(
+                                '<p class="object-description">' + objectSum + ' грн. ' + status + '</p>'
+                            );
+                            if (objectFin.description) {
+                                $('.finances-part').append(
+                                    '<p class="object-description">' + objectFin.description + '</p>'
+                                );
+                            }
+                        });
+                    } else if( 'price' in  object[0] ) {
+
+                        $('.finances-part').append(
+                            '<p class="object-description">' + object[0].price + ' грн. ' + status + '</p>'
+                        );
+
+                    }else{
+                        $('.finances-part').append(
+                            '<p class="object-description">Не має прайсингу для даного об’єкта</p>'
+                        );
+                    }
+
+                    $('#object-one-list').append(
+                        '<input class="hiidenIdObject" type="hidden" value="' + object[0].id + '">'
+                    );
+
+                    $('.selected-object-head').text("До об’єктів");
+
+                    var commentsFacebook =
+                    '<div class="fb-comments" data-href="https://map.shtab.net/get-object-facebook/' + object[0].id + '" data-numposts="5" data-width="250"></div>';
+
+                    $('#comments-part').append(
+                        '<p class="comments-head">Залишити коментар</p>' +
+                        '<div class="facebook-comments-wrapper">' +
+                            commentsFacebook +
+                        '</div>'
+                    );
+
+                    FB.XFBML.parse();
+                }
+            });
+
+            $(".selected-object-label").removeClass("hide");
+            $('.list-objects-label').addClass("hide");
+        }
+
+        $(document).ready(function () {
+
+            $("#pagination-ten").on("click", function () {
+                $("#pagination-ten").addClass("disabled-link");
+                $("#pagination-twenty").removeClass("disabled-link");
+                $("#pagination-fifty").removeClass("disabled-link");
+            });
+            $("#pagination-twenty").on("click", function () {
+                $("#pagination-ten").removeClass("disabled-link");
+                $("#pagination-twenty").addClass("disabled-link");
+                $("#pagination-fifty").removeClass("disabled-link");
+            });
+            $("#pagination-fifty").on("click", function () {
+                $("#pagination-ten").removeClass("disabled-link");
+                $("#pagination-twenty").removeClass("disabled-link");
+                $("#pagination-fifty").addClass("disabled-link");
+            });
+
+            $('.selectpicker').selectpicker({
+                showIcon: true
+            });
+
+            $("#object-all-list").on("click", ".list-item-flex", function () {
+                var object_lat = parseFloat($(this).find($('.lat')).text());
+                var object_lng = parseFloat($(this).find($('.lng')).text());
+                var object_id = ($(this).find($('.hiidenIdObject')).val());
+
+                if( !isNaN(object_lat) || !isNaN(object_lng) ) {
+
+                    var LatLng = new google.maps.LatLng(object_lat, object_lng);
+                    map.setCenter(LatLng);
+                    map.setZoom(18);
+                }
+
+                loadObjectInformation(object_id);
+            });
+
+            $(".objects-table").css({width: 'toggle'});
+
+            $(".sidebar-controller").click(function () {
+                $(".objects-table").animate({width: 'toggle'});
+                $(".sidebar-controller").toggleClass("slide-width");
+                $(".arrow-right").toggleClass("hide");
+                $(".arrow-left").toggleClass("hide");
+            });
+
+            $(".mobile-sidebar-controller").click(function () {
+                $(".sidebar").toggleClass("slide-down");
+
+                $(".sidebar-body").toggleClass("height-69");
+                $(".scroll-part").toggleClass("zero-height");
+
+                $(".down-obj").toggleClass("hide");
+                $(".up-obj").toggleClass("hide");
+            });
+
+            $(".control-arrow").click(function () {
+                $(".search-body").slideToggle();
+
+                $(".search-body").removeClass('hide')
+
+
+                $(".downer").toggleClass("hide");
+                $(".upper").toggleClass("hide");
+            });
+
+            $(function () {
+                $("#slider-range").slider({
+                    range: true,
+                    min: 0,
+                    max: 1000000,
+                    values: [{{ isset($_POST['price_from']) ? $_POST['price_from'] : 0 }},{{ isset($_POST['price_to']) ? $_POST['price_to'] : 700000 }}],
+                    slide: function (event, ui) {
+                        $("#amount-one").val(ui.values[0]);
+                        $("#amount-two").val(ui.values[1]);
+                    }
+                });
+                $("#amount-one").val($("#slider-range").slider("values", 0));
+                $("#amount-two").val($("#slider-range").slider("values", 1));
+            });
+        });
+
+
+        function selectAll(source) {
+            checkboxes = document.getElementsByName('save[]');
+            for (var i = 0, n = checkboxes.length; i < n; i++) {
+                checkboxes[i].checked = source.checked;
+            }
+        }
+
+        $( ".exp-var" ).click(function( event ) {
+            var selected = [];
+
+            $('#errorDiv').empty();
+
+            $('#checkboxesWrapper input:checked').each(function() {
+                selected.push($(this).attr('value'));
+            });
+
+            if( selected.length == 0 ){
+                event.preventDefault();
+                $( "#errorDiv" ).append( '<p class="export-error">Будь ласка, оберіть об’єкти</p>' );
+            }
+        });
+
+    </script>
+@endsection

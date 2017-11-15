@@ -32,9 +32,9 @@ Route::post('/remove_finances', 'FinancesController@delete')->middleware('auth' 
 
 
 //delete after
-Auth::routes();
+//Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+//Route::get('/home', 'HomeController@index')->name('home');
 
 Route::get('/redirect/{provider}/{objectId}', 'SocialAuthController@redirect');
 Route::get('/callback/{provider}', 'SocialAuthController@callback');

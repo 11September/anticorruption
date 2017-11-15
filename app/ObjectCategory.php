@@ -28,4 +28,11 @@ class ObjectCategory extends Model
 
         return $categoriesWithRelations;
     }
+
+    public static function allCategories()
+    {
+        $categories = static::select('id', 'name', 'image')->get();
+
+        return $categories;
+    }
 }

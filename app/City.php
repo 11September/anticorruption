@@ -28,4 +28,12 @@ class City extends Model
 
         return $citiesWithRelations;
     }
+
+    public static function allCities()
+    {
+        $cities = static::select('id', 'name')->get();
+
+        return $cities;
+    }
+
 }

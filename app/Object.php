@@ -146,15 +146,17 @@ class Object extends Model
 
     public static function sumaRepairs($data)
     {
-        $suma = Object::select(DB::raw("SUM(price) as suma"))
-            ->whereIn('id', $data)
-            ->get()
-            ->toArray();
+        // $suma = Object::select(DB::raw("SUM(price) as suma"))
+        //     ->whereIn('id', $data)
+        //     ->get()
+        //     ->toArray();
 
-        $suma = array_column($suma, 'suma');
+        // $suma = array_column($suma, 'suma');
 
-        $total_suma = (integer)$suma[0];
+        // $total_suma = (integer)$suma[0];
 
+        $total_suma = (string)Object::select('price')->get()->sum('price');
+        
         return $total_suma;
     }
 

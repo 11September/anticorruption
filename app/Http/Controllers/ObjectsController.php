@@ -72,7 +72,19 @@ class ObjectsController extends Controller
 
         $regionContainsObjectsAmount = collect(Region::countRelatedObjects($objects));
 
-        return view('welcome', compact('objects', 'suma', 'regionContainsObjectsAmount', 'filteredByCity'));
+        $regions = collect(Object::distinct('region_id')->pluck('region_id'));
+        $regionContainsObjectsAmount = [];
+        $regionClustersCoords = [];
+
+        foreach ($regions as $regionId) {
+            $regionContainsObjectsAmount[$regionId] = Object::where( "region_id", "=", $regionId )->whereNotNull('maps_lat')->whereNotNull('maps_lng')->count();
+            $regionClustersCoords[$regionId] = Region::select('map_lat','map_lng')->where('id', $regionId)->get()->toArray();
+        }
+
+        $regionClustersCoords = collect( $regionClustersCoords );
+        $regionContainsObjectsAmount = collect( $regionContainsObjectsAmount );
+
+        return view('welcome', compact('objects', 'suma', 'regionContainsObjectsAmount', 'filteredByCity', 'regionClustersCoords'));
     }
 
     public function show(Request $request)

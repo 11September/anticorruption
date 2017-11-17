@@ -16,22 +16,7 @@ class ObjectCategory extends Model
 
     public static function categories()
     {
-        $categoriesWithRelations = [];
-
-        $categories = static::with('objects')->get();
-        
-        foreach ($categories as $category) {
-            if(count($category->objects) > 0) {
-                array_push($categoriesWithRelations, $category);
-            }
-        }
-
-        return $categoriesWithRelations;
-    }
-
-    public static function allCategories()
-    {
-        $categories = static::select('id', 'name', 'image')->get();
+        $categories = static::select('id', 'name', 'image')->has('objects')->get();
 
         return $categories;
     }

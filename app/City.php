@@ -16,22 +16,7 @@ class City extends Model
 
     public static function cities()
     {
-        $citiesWithRelations = [];
-
-        $cities = static::with('objects')->get();
-        
-        foreach ($cities as $city) {
-            if(count($city->objects) > 0) {
-                array_push($citiesWithRelations, $city);
-            }
-        }
-
-        return $citiesWithRelations;
-    }
-
-    public static function allCities()
-    {
-        $cities = static::select('id', 'name')->get();
+        $cities = static::select('id', 'name')->has('objects')->get();
 
         return $cities;
     }

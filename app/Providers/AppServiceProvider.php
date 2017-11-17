@@ -32,10 +32,8 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         view()->composer('partials.nav', function ($view){
-//            $view->with('categories', ObjectCategory::categories());
-            $view->with('categories', ObjectCategory::allCategories());
-//            $view->with('cities', City::cities());
-            $view->with('cities', City::allCities());
+            $view->with('categories', ObjectCategory::categories());
+            $view->with('cities', City::cities());
             $view->with('customers', Customer::customers());
             $view->with('contractors', Contractor::contractors());
             $view->with('years', Object::yearsInterval());

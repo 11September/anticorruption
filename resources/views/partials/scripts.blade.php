@@ -3,8 +3,6 @@
 <script src="{{ asset('js/jquery-ui.min.js') }}"></script>
 <script src="{{ asset('js/bootstrap.min.js') }}"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/OverlappingMarkerSpiderfier/1.0.3/oms.min.js"></script>
-
 <div id="fb-root"></div>
 <script>(function (d, s, id) {
         var js, fjs = d.getElementsByTagName(s)[0];

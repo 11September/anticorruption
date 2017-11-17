@@ -47,8 +47,7 @@
     <script defer
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs&callback=initMap">
     </script>
-    <!-- my key -> AIzaSyAECoGPJKuBmmc4_Y0PjKkWRLUjheLqwAI -->
-    <!-- anticor off key -> AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs -->
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
     <script defer src="{{ URL::asset('js/markers_with_label.js') }}" type="text/javascript"></script>
     @include('partials.autocomplete')
@@ -119,14 +118,7 @@
                 });
             }
 
-            var oms = new OverlappingMarkerSpiderfier(map, { 
-                markersWontMove: true, 
-                markersWontHide: true,
-                basicFormatEvents: true
-            });
-
             markers = locations.map(function (location, i) {
-                
                 //var objectImage = objects[i].category ? objects[i].category.image : "{{ asset('img/markers/cluster.png') }}";
                 var objectImage = "{{ asset('img/markers/marker1.png') }}";
 
@@ -185,7 +177,7 @@
             function createCluster(_position, _containsArray, _containsLabel){
 
                 var clusterImagePath = "{{ asset('img/markers/cluster.png') }}";
-                console.log(_containsArray)
+                
                 var cluster = new MarkerWithLabel({
                     position: _position,
                     map: map,

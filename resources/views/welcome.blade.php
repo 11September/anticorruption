@@ -119,12 +119,12 @@
             }
 
             markers = locations.map(function (location, i) {
-                //var objectImage = objects[i].category ? objects[i].category.image : "{{ asset('img/markers/cluster.png') }}";
-                var objectImage = "{{ asset('img/markers/marker1.png') }}";
+                var objectImage = objects[i].category ? objects[i].category.image : "{{ asset('img/markers/cluster.png') }}";
+                // var objectImage = "{{ asset('img/markers/marker1.png') }}";
 
                 var image = new google.maps.MarkerImage(
-                    //pathToImages + "/" + objectImage,
-                    objectImage,
+                    pathToImages + "/" + objectImage,
+                    //objectImage,
                     null,
                     null,
                     null,

@@ -7,8 +7,9 @@ Route::post('/filter', 'ObjectsController@filter')->name('filter');
 Route::get('/page-{slug}', 'PagesController@page');
 //Dynamic Routes
 
+Route::get('/get-object-facebook/{id}', 'ObjectsController@index');
 Route::get('/get-object', 'ObjectsController@show');
-Route::get('/get-object-facebook/{id}', 'ObjectsController@facebook');
+//Route::get('/get-object-facebook/{id}', 'ObjectsController@facebook');
 
 Route::post('/export-download', 'PagesController@exportDownload');
 Route::get('/additional-download/{path}', 'PagesController@addtionalDownload');

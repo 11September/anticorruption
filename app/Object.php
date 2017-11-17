@@ -140,7 +140,7 @@ class Object extends Model
 
     public static function addresses()
     {
-        $results = array_column(Object::select('address')->get()->toArray(), 'address');
+        $results = array_column(static::select('address')->get()->toArray(), 'address');
         return $results;
     }
 
@@ -155,14 +155,14 @@ class Object extends Model
 
         // $total_suma = (integer)$suma[0];
 
-        $total_suma = (string)Object::select('price')->get()->sum('price');
+        $total_suma = (string)static::select('price')->get()->sum('price');
         
         return $total_suma;
     }
 
     public static function sumaRepairsAll()
     {
-        $suma = Object::select(DB::raw("SUM(price) as suma"))
+        $suma = static::select(DB::raw("SUM(price) as suma"))
             ->get()
             ->toArray();
 

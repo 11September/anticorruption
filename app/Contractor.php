@@ -14,15 +14,17 @@ class Contractor extends Model
 
     public static function contractors()
     {
-        $contractorsWithRelations = [];
+        // $contractorsWithRelations = [];
 
-        $contractors = static::with('objects')->get();
+        // $contractors = static::with('objects')->get();
         
-        foreach ($contractors as $contractor) {
-            if(count($contractor->objects) > 0) {
-                array_push($contractorsWithRelations, $contractor);
-            }
-        }
+        // foreach ($contractors as $contractor) {
+        //     if(count($contractor->objects) > 0) {
+        //         array_push($contractorsWithRelations, $contractor);
+        //     }
+        //}
+
+        $contractorsWithRelations = static::has('objects')->get();
 
         return $contractorsWithRelations;
     }

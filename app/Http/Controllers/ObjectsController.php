@@ -21,8 +21,13 @@ use \Exception;
 
 class ObjectsController extends Controller
 {
-    public function index(Request $request)
-    {
+    public function index($id = "")
+    {   
+
+        if( $id ){
+            $facebookObject = Object::findOrFail($id);
+        }
+
         $objects = Object::selected()->with(
             array(
                 'category' => function ($query) {
@@ -54,7 +59,7 @@ class ObjectsController extends Controller
         $regionContainsObjectsAmount = collect( $regionContainsObjectsAmount );
         // $regionContainsObjectsAmount = collect(Region::countRelatedObjects($objects));
 
-        return view('welcome', compact('objects', 'suma', 'regionContainsObjectsAmount', 'regionClustersCoords', 'filteredByCity'));
+        return view('welcome', compact('objects', 'suma', 'regionContainsObjectsAmount', 'regionClustersCoords', 'filteredByCity', 'facebookObject'));
     }
 
     public function filter(Request $request)

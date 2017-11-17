@@ -187,7 +187,6 @@ class VoyagerObjectsController extends Controller
         }
 
         if (!$request->ajax()) {
-            dd($request);
             $object = Object::where('id', $id)->first();
 
             $object->name = $request->name;
@@ -334,7 +333,7 @@ class VoyagerObjectsController extends Controller
             $finances->date = Carbon::now()->toDateString();
             $finances->object_id = $object->id;
             $finances->save();
-            dd($finances);
+
             return redirect()
                 ->route("voyager.{$dataType->slug}.edit", ['id' => $object->id])
                 ->with([

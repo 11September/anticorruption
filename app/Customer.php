@@ -14,15 +14,16 @@ class Customer extends Model
 
     protected static function customers()
     {
-        $customersWithRelations = [];
+        // $customersWithRelations = [];
 
-        $customers = static::with('objects')->get();
+        // $customers = static::with('objects')->get();
         
-        foreach ($customers as $customer) {
-            if(count($customer->objects) > 0) {
-                array_push($customersWithRelations, $customer);
-            }
-        }
+        // foreach ($customers as $customer) {
+        //     if(count($customer->objects) > 0) {
+        //         array_push($customersWithRelations, $customer);
+        //     }
+        // }
+        $customersWithRelations = static::has('objects')->get();
 
         return $customersWithRelations;
     }

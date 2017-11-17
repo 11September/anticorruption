@@ -9,15 +9,17 @@
 @section('description'){{ Voyager::setting('description') }}@endsection
 
 @section('facebookCommentsModerator')
-    <meta property="og:url" content="https://map.shtab.net/" />
-    <meta property="og:title" content="Map shtab" />
-    <meta property="og:description" content="Map shtab project" />
-    <meta property="og:image" content="https://www.facebook.com/images/fb_icon_325x325.png" />
-    <meta property="og:type" content="website" />
 
-    {{--<meta property="fb:admins" content="100004911010171"/>--}}
-    {{--<meta property="fb:admins" content="100005514735414"/>--}}
-    <meta property="fb:app_id" content="1509381815774111"/>
+{{--    <meta property="og:url" content="{{ env('APP_URL') .'get-object-facebook/'. $object->id }}" /> --}}
+    @if( isset( $facebookObject ) )
+        <meta property="og:url" content="{{ env('APP_URL') .'$facebookObject->id/' }}" />
+        <meta property="og:title" content="{{ $facebookObject->name . " - " . $facebookObject->address }}" />
+        <meta property="og:description" content="{{ $facebookObject->description }}" />
+        <meta property="og:image" content="https://www.facebook.com/images/fb_icon_325x325.png" />
+        <meta property="og:type" content="website" />
+        <meta property="fb:app_id" content="1509381815774111"/> 
+    @endif
+
 @endsection
 
 @section('content')
@@ -56,9 +58,9 @@
             text-align: center;
             width: 40px;
             height: 50px;
-            margin-left: -20px !important;
+            /*margin-left: -20px !important;
             margin-top: -50px !important;
-            padding-top: 9px;
+            padding-top: 9px*/;
             font-size: 14px;
             font-weight: bold;
             color: dimgrey;
@@ -183,29 +185,52 @@
             function createCluster(_position, _containsArray, _containsLabel){
 
                 var clusterImagePath = "{{ asset('img/markers/cluster.png') }}";
+                console.log(_containsArray)
+                var cluster = new MarkerWithLabel({
+                    position: _position,
+                    map: map,
+                    contains: _containsArray,
+                    labelClass: "labels",
+                    labelContent: _containsLabel,
+                    labelInBackground: false,
+                    cluster: true,
+                });
+
+                setClusterSize( cluster );
+
+                return cluster;
+
+            }
+
+            function setClusterSize( cluster ){
+                var size, anchor;
+                
+                if( cluster.labelContent >= 10000 ){
+                    size = new google.maps.Size(78, 78);
+                    anchor = new google.maps.Point(20, 57);
+                }else if( cluster.labelContent >= 1000 ){
+                    size = new google.maps.Size(65, 65);
+                    anchor = new google.maps.Point(21, 50);
+                }else if( cluster.labelContent >= 100 ) {
+                    size = new google.maps.Size(58, 58);
+                    anchor = new google.maps.Point(20, 46);
+                }else{
+                    size = new google.maps.Size(50, 50);
+                    anchor = new google.maps.Point(20, 41);
+                }
+
+                var clusterImagePath = "{{ asset('img/markers/cluster.png') }}";
 
                 var clusterImage = new google.maps.MarkerImage(
                     clusterImagePath,
                     null,
                     null,
                     null,
-                    new google.maps.Size(50, 50)
+                    size
                 );
 
-                var cluster = new MarkerWithLabel({
-                    position: _position,
-                    map: map,
-                    icon: clusterImage,
-                    contains: _containsArray,
-                    labelClass: "labels",
-                    labelContent: _containsLabel,
-                    labelAnchor: new google.maps.Point(4, 35),
-                    labelInBackground: false,
-                    cluster: true,
-                });
-
-                return cluster;
-
+                cluster.setIcon( clusterImage );
+                cluster.labelAnchor = anchor;
             }
 
             function clusterization( _mapBounds ) {
@@ -292,12 +317,14 @@
                             clusterToAdd.labelContent = clusterToAdd.contains.length;
                             _marker.setMap( null );
                             _marker.cluster = clusterToAdd;
+                            setClusterSize( clusterToAdd );
                         }
                     }else{
                         if( _marker.cluster === false ){
-                            var cluster = createCluster( marker.getPosition(), contains, contains.length.toString() );
-                            cluster.contains.push( _marker );
-                            cluster.labelContent = cluster.contains.length;
+                            contains.push( _marker );
+                            var cluster = createCluster( marker.getPosition(), contains, contains.length );
+                            cluster.contains = contains;
+                            cluster.labelContent = contains.length;
                             clusterMarkers.push( cluster );
                             _marker.setMap( null );
                             _marker.cluster = cluster;

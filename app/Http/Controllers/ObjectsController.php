@@ -83,8 +83,8 @@ class ObjectsController extends Controller
             $count = $objectsBuilder->where( "region_id", "=", $regionId )->whereNotNull('maps_lat')->whereNotNull('maps_lng')->count();
             if( $count > 0 ){
                 $regionContainsObjectsAmount[$regionId] = $count;
+                $regionClustersCoords[$regionId] = Region::select('map_lat','map_lng')->where('id', $regionId)->get()->toArray();
             }
-            $regionClustersCoords[$regionId] = Region::select('map_lat','map_lng')->where('id', $regionId)->get()->toArray();
         }
 
         $regionClustersCoords = collect( $regionClustersCoords );

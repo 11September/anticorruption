@@ -391,6 +391,7 @@
                 var mapBounds = map.getBounds();
                 if( map.getZoom() <= 19 ){
                     regionClusterization( mapBounds );
+                }else{
                     resetMarkers();
                 }
             });

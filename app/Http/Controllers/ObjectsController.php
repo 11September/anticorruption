@@ -166,7 +166,7 @@ class ObjectsController extends Controller
                         $rowData = [];
                         foreach ($data as $value) {
                             // $value = iconv(mb_detect_encoding($value, mb_detect_order(), true), "UTF-8", $value);
-                            array_push($rowData, $value);
+                            array_push($rowData, str_replace('i', 'і', $value));
                         }
                         $objectData = array_combine($keys, $rowData);
                     }
@@ -201,14 +201,14 @@ class ObjectsController extends Controller
                 $importData[$key]['updateObject'] = '';
 
                 $exsistObject = Object::where( 'address', '=', $objectData['address'] )->with('category')->first();
-
+                
                 if( !is_null( $exsistObject ) ){
 
                     if( $exsistObject->name == $objectData['name'] ){
                         $importData[$key]['updateObject'] = $exsistObject->id;
                     }
 
-                    if( $exsistObject->name !=  $objectData['name'] ){
+                    if( $exsistObject->name !=  $objectData['name'] && !is_null($exsistObject->category) ){
                         $importData[$key]['updateObject'] = $exsistObject->category->name == $objectData['category'] ? $exsistObject->id : '';
                     }
                 }
@@ -222,7 +222,7 @@ class ObjectsController extends Controller
                 //     }
                 // }
             }
-
+            // dd($importData);
             for ($arrIndex = 0; $arrIndex < count($importData); $arrIndex++) {
 
                 $googleApiZeroResultException = false;

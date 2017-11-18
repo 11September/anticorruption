@@ -64,8 +64,8 @@ class ObjectsController extends Controller
 
     public function filter(Request $request)
     {
-        $objects = Object::filter($request->all())->with('category', 'region', 'finances')->get();
-
+        $objectsBuilder = Object::filter($request->all())->with('category', 'region', 'finances');
+        $objects = $objectsBuilder->get();
 
         $filteredByCity = $request->city_id ? 'true' : 'false';
 
@@ -80,7 +80,10 @@ class ObjectsController extends Controller
         $regionClustersCoords = [];
 
         foreach ($regions as $regionId) {
-            $regionContainsObjectsAmount[$regionId] = Object::where( "region_id", "=", $regionId )->whereNotNull('maps_lat')->whereNotNull('maps_lng')->count();
+            $count = $objectsBuilder->where( "region_id", "=", $regionId )->whereNotNull('maps_lat')->whereNotNull('maps_lng')->count();
+            if( $count > 0 ){
+                $regionContainsObjectsAmount[$regionId] = $count;
+            }
             $regionClustersCoords[$regionId] = Region::select('map_lat','map_lng')->where('id', $regionId)->get()->toArray();
         }
 
@@ -295,9 +298,7 @@ class ObjectsController extends Controller
                             if ($categories->count() > 0 && strlen($value) > 0) {
                                 $categoryExist = false;
                                 foreach ($categories as $category) {
-                                    dump(mb_strtolower( $value ));
-                                    dump($category->name);
-                                    dump($category->name == mb_strtolower( $value ));
+                                    
                                     if ( $category->name == mb_strtolower( $value ) ) {
                                         
                                         $newObjectCategory_id = $category->id;
@@ -306,9 +307,9 @@ class ObjectsController extends Controller
 
                                     }
                                 }
-                                dump($categoryExist);
+                                
                                 if ($categoryExist === false) {
-                                    dump('zalupa');
+                                    
                                     $newCategory = new ObjectCategory();
                                     $newCategory->name = $value;
                                     $newCategory->image = '';
@@ -318,7 +319,7 @@ class ObjectsController extends Controller
                                 }
 
                             } elseif (strlen($value) > 0) {
-                                dump('zalupa2');
+                                
                                 $newCategory = new ObjectCategory();
                                 $newCategory->name = $value;
                                 $newCategory->image = '';

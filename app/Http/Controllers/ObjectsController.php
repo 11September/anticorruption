@@ -85,6 +85,7 @@ class ObjectsController extends Controller
                 $regionContainsObjectsAmount[$regionId] = $count;
                 $regionClustersCoords[$regionId] = Region::select('map_lat','map_lng')->where('id', $regionId)->get()->toArray();
             }
+            
         }
 
         $regionClustersCoords = collect( $regionClustersCoords );
@@ -563,6 +564,21 @@ class ObjectsController extends Controller
 
                 if (!$googleApiZeroResultException) {
 
+                    $checkObject = Object::where( 'address', '=', $newObjectAddress )->with('category')->first();
+
+                    if( !is_null( $checkObject ) ){
+
+                        if( $checkObject->name == $objectData['name'] ){
+                            $objectData['updateObject'] = $checkObject->id;
+                        }
+
+                        if( $checkObject->name !=  $objectData['name'] && !is_null($checkObject->category) ){
+                            $objectData['updateObject'] = $checkObject->category->name == $objectData['category'] ? $checkObject->id : '';
+                        }
+
+                        $object = $checkObject;
+                    }
+
                     $createNewFinance = true;
 
                     if (strpos($object->work_description, $newObjectWork_description) !== false) {
@@ -579,7 +595,7 @@ class ObjectsController extends Controller
                     $object->customer_id = $newObjectCustomer_id;
                     $object->contractor_id = $newObjectContractor_id;
                     $object->region_id = $newObjectRegion_id;
-                    $object->price = strlen($objectData['updateObject']) > 0 ? $newFinanceSuma + $object->price : $newFinanceSuma;
+                    $object->price = strlen($objectData['updateObject']) > 0 ? (float)$newFinanceSuma + (float)$object->price : $newFinanceSuma;
                     $object->work_description = strlen($objectData['updateObject']) > 0 ? $object->work_description . ' ' . $newObjectWork_description : $newObjectWork_description;
                     $object->finished_at = $newObjectFinished_at;
                     $object->finished_year = $newObjectFinished_year;
@@ -595,42 +611,54 @@ class ObjectsController extends Controller
                     $object->save();
 
                     if (strlen($newDocumentTitle) > 0 && strlen($newDocumentFile_path) > 0) {
-                        if (strlen($objectData['updateObject']) == 0) {
+                        $checkDocument = Document::where([
+                            ['object_id', '=', $object->id],
+                            ['title', '=', $newObjectName],
+                            ['file_path', '=', $newDocumentFile_path]
+                        ])->first();
+
+                        if ( !is_null($checkDocument) ) {
                             $newDocument = new Document();
-                        }
-                        if (strlen($objectData['updateObject']) > 0) {
-                            $newDocument = Document::where('object_id', '=', $objectData['updateObject'])->orderBy('created_at', 'desc')->first();
-                        }
-                        if ($newDocument == null) {
-                            $newDocument = new Document();
-                        }
+                            $newDocument->title = $newObjectName;
+                            $newDocument->file_path = $newDocumentFile_path;
+                            $newDocument->object_id = $object->id;
+                            $newDocument->save();
+                        }else{
+                            $newDocument = $checkDocument;
 
-                        $newDocument->title = $newDocumentTitle;
-                        $newDocument->file_path = $newDocumentFile_path;
-                        $newDocument->object_id = $object->id;
-                        $newDocument->save();
-                    }
-
-                    if (strlen($objectData['updateObject']) == 0 || $createNewFinance) {
-                        $newFinance = new Finance();
-                    }
-                    if (strlen($objectData['updateObject']) > 0 && !$createNewFinance) {
-                        $newFinance = Finance::where('object_id', '=', $objectData['updateObject'])->orderBy('created_at', 'desc')->first();
-                    }
-                    if ($newFinance == null) {
-                        $newFinance = new Finance();
-                    }
-                    if (strlen($financeSuma) > 0) {
-                        $newFinance->suma = $financeSuma;
-                    } else {
-                        $newFinance->suma = $newFinanceSuma;
+                            $newDocument->title = $newObjectName;
+                            $newDocument->file_path = $newDocumentFile_path;
+                            $newFinance->object_id = $object->id;
+                            $newFinance->save();
+                        }
                     }
 
-                    $newFinance->status = $newFinanceStatus;
-                    $newFinance->description = $newFinanceDescription;
-                    $newFinance->date = $newFinanceDate;
-                    $newFinance->object_id = $object->id;
-                    $newFinance->save();
+                    if( strlen($newFinanceSuma) > 0 && $createNewFinance){
+                        $checkFinance = Finance::where([
+                            ['object_id', '=', $object->id],
+                            ['description', '=', $newObjectWork_description]
+                        ])->get();
+
+                        if( !is_null( $checkFinance ) ){
+                            $newFinance = new Finance();
+                            
+                            $newFinance->suma = $newFinanceSuma;
+                            $newFinance->status = 'paid';
+                            $newFinance->description = $newObjectWork_description;
+                            $newFinance->date = $newFinanceDate;
+                            $newFinance->object_id = $object->id;
+                            $newFinance->save();
+                        }else{
+                            $newFinance = $checkFinance;
+
+                            $newFinance->suma = $newFinanceSuma;
+                            $newFinance->status = 'paid';
+                            $newFinance->description = 'ДОПЛАТА ЗА: ' . $newFinance->description;
+                            $newFinance->date = $newFinanceDate;
+                            $newFinance->object_id = $object->id;
+                            $newFinance->save();
+                        }
+                    }
                 }
             }
             

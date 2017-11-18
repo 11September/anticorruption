@@ -420,7 +420,7 @@
                 if (map.getZoom() < 7) {
 
                     $.each( regionClustersCoords, function ( i, clusLatLng ) {
-                        console.log(regionContainsObjectsAmount);
+                        
                         var coords = JSON.stringify( new google.maps.LatLng( clusLatLng[0].map_lat, clusLatLng[0].map_lng ));
                         var regionContains = regionContainsObjectsAmount[i].toString();
 

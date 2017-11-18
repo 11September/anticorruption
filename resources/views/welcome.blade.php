@@ -146,7 +146,7 @@
                     cluster: false,
                 });
 
-                marker.addListener('click', function () {
+                google.maps.event.addListener(marker, 'spider_click', function () {
 
                     var object_id = marker.objectId;
 
@@ -229,6 +229,15 @@
 
                 cluster.setIcon( clusterImage );
                 cluster.labelAnchor = anchor;
+            }
+
+            function resetMarkers(){
+                $.each( clusterMarkers, function (i, cluster) {
+                    cluster.setMap(null);
+                });
+                $.each( markers, function (i, marker) {
+                    oms.addMarker(marker);
+                });
             }
 
             function clusterization( _mapBounds ) {
@@ -380,8 +389,10 @@
 
             google.maps.event.addListener(map, 'idle', function () {   
                 var mapBounds = map.getBounds();
-                if( map.getZoom() <= 19 )
-                regionClusterization( mapBounds );
+                if( map.getZoom() <= 19 ){
+                    regionClusterization( mapBounds );
+                    resetMarkers();
+                }
             });
 
             google.maps.event.addListener(map, 'zoom_changed', function (){

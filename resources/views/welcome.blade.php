@@ -45,7 +45,7 @@
 @section('scripts')
 
     <script defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs&callback=initMap">
+            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs&language=uk&callback=initMap">
     </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
@@ -124,7 +124,7 @@
 
                 var image = new google.maps.MarkerImage(
                     pathToImages + "/" + objectImage,
-                    //objectImage,
+                    // objectImage,
                     null,
                     null,
                     null,
@@ -373,7 +373,8 @@
             var regionClusters = [];
 
             google.maps.event.addListener(map, 'idle', function () {   
-                var mapBounds = map.getBounds();             
+                var mapBounds = map.getBounds();
+                if( map.getZoom() <= 19 )
                 regionClusterization( mapBounds );
             });
 

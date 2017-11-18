@@ -223,6 +223,13 @@ class ObjectsController extends Controller
                 // }
             }
             // dd($importData);
+
+            $categories = ObjectCategory::all();
+            $customers = Customer::all();
+            $contractors = Contractor::all();
+            $cities = City::all();
+            $regions = Region::all();
+
             for ($arrIndex = 0; $arrIndex < count($importData); $arrIndex++) {
 
                 $googleApiZeroResultException = false;
@@ -236,12 +243,6 @@ class ObjectsController extends Controller
                 if (strlen($objectData['updateObject']) > 0) {
                     $object = Object::where('id', $objectData['updateObject'])->first();
                 }
-
-                $categories = ObjectCategory::all();
-                $customers = Customer::all();
-                $contractors = Contractor::all();
-                $cities = City::all();
-                $regions = Region::all();
 
                 $newObjectName = '';
                 $newObjectAddress = '';
@@ -290,22 +291,24 @@ class ObjectsController extends Controller
                     switch ($key) {
 
                         case 'category':
-
+                            
                             if ($categories->count() > 0 && strlen($value) > 0) {
                                 $categoryExist = false;
                                 foreach ($categories as $category) {
-
-                                    if ($category->name == strtolower( $value ) ) {
-
+                                    dump(mb_strtolower( $value ));
+                                    dump($category->name);
+                                    dump($category->name == mb_strtolower( $value ));
+                                    if ( $category->name == mb_strtolower( $value ) ) {
+                                        
                                         $newObjectCategory_id = $category->id;
                                         $categoryExist = true;
                                         break;
 
                                     }
                                 }
-
+                                dump($categoryExist);
                                 if ($categoryExist === false) {
-
+                                    dump('zalupa');
                                     $newCategory = new ObjectCategory();
                                     $newCategory->name = $value;
                                     $newCategory->image = '';
@@ -315,14 +318,15 @@ class ObjectsController extends Controller
                                 }
 
                             } elseif (strlen($value) > 0) {
+                                dump('zalupa2');
                                 $newCategory = new ObjectCategory();
                                 $newCategory->name = $value;
                                 $newCategory->image = '';
                                 $newCategory->save();
 
                                 $newObjectCategory_id = $newCategory->id;
-                                break;
-                            }
+                                
+                            }else{}
 
                             break;
 
@@ -628,9 +632,9 @@ class ObjectsController extends Controller
                     $newFinance->save();
                 }
             }
-
+            
             Storage::delete('/import/import.csv');
-        
+            // dd('yeee');
         } catch (Exception $exception) {
             return redirect()->back()->with([
                 'message' => 'Не вдалося імпортувати інформацію (перевірте CSV файл)' . $exception->getMessage() . ': ' . $exception->getLine(),

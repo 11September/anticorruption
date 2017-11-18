@@ -420,7 +420,7 @@
                 if (map.getZoom() < 7) {
 
                     $.each( regionClustersCoords, function ( i, clusLatLng ) {
-                        
+
                         var coords = JSON.stringify( new google.maps.LatLng( clusLatLng[0].map_lat, clusLatLng[0].map_lng ));
                         var regionContains = regionContainsObjectsAmount[i].toString();
 
@@ -445,8 +445,24 @@
                     clusterization( _mapBounds );
                 }
             }
+        }
 
+        function setMoneyIndicator( _moneysAmount ) {
+            var moneyPrefix = '', moneysAmountFormatted;
+            if(_moneysAmount< 1000000){
+                moneysAmountFormatted = parseInt(_moneysAmount/ 1000);
+                moneyPrefix = ' тис.';
+            }else if(_moneysAmount< 1000000000){
+                moneysAmountFormatted = parseInt(_moneysAmount/ 1000000);
+                moneyPrefix = ' млн.';
+            }else if(_moneysAmount< 1000000000000){
+                moneysAmountFormatted = parseInt(_moneysAmount/ 1000000000);
+                moneyPrefix = ' млрд.';
+            }else { 
+                moneysAmountFormatted = 'Більше трильйона';
+            }
 
+            $(".money-indicator").text(moneysAmountFormatted + moneyPrefix);
         }
 
         function hideInfo() {
@@ -455,23 +471,10 @@
             $('#object-all-list').empty();
             $(".selected-object-label").addClass("hide");
             $('.list-objects-label').removeClass("hide");
-            var moneyPrefix = '', moneysAmountFormatted;
-            if(moneysAmount < 1000000){
-                moneysAmountFormatted = parseInt(moneysAmount / 1000);
-                moneyPrefix = ' тис.';
-            }else if(moneysAmount < 1000000000){
-                moneysAmountFormatted = parseInt(moneysAmount / 1000000);
-                moneyPrefix = ' млн.';
-            }else if(moneysAmount < 1000000000000){
-                moneysAmountFormatted = parseInt(moneysAmount / 1000000000);
-                moneyPrefix = ' млрд.';
-            }else { 
-                moneysAmountFormatted = 'Більше трильйона';
-            }
-
-            $(".money-indicator").text(moneysAmountFormatted + moneyPrefix);
 
             $('.pagination-links-div').removeClass('hide');
+
+            setMoneyIndicator( moneysAmount );
 
             sidebarObjectsAmount($('.disabled-link').text());
         }
@@ -523,7 +526,7 @@
                     $('#comments-part').empty();
                     $('#object-all-list').empty();
 
-                    $(".money-indicator").text(parseInt(object[0].price / 1000) + ' тис.');
+                    setMoneyIndicator( parseInt(object[0].price) );
 
                     if ('name' in object[0]) {
                         $('#object-one-list').append(
@@ -580,7 +583,7 @@
                         $.each(object[0].documents, function( i, objectDoc ) {
 
                             $('.document-part').append(
-                                '<a target="_blank" href="' + objectDoc.file_path + '">' + objectDoc.title + '</a>'
+                                '<a target="_blank" href="' + objectDoc.file_path + '"></a>'
                             );
 
                         });
@@ -606,11 +609,6 @@
                             $('.finances-part').append(
                                 '<p class="object-description">' + objectSum + ' грн. ' + status + '</p>'
                             );
-                            if (objectFin.description) {
-                                $('.finances-part').append(
-                                    '<p class="object-description">' + objectFin.description + '</p>'
-                                );
-                            }
                         });
                     } else if( 'price' in  object[0] ) {
 

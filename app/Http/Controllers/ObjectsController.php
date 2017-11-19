@@ -262,7 +262,7 @@ class ObjectsController extends Controller
                     if (strlen($objectData['latitude']) < 2 || strlen($objectData['longitude']) < 2) {
 
                         $addressForRequest = str_replace(' ', '+', $importData[$arrIndex]['address']);
-                        $json = file_get_contents('https://maps.googleapis.com/maps/api/place/textsearch/json?query=' . $addressForRequest . '&key=AIzaSyAzxY-YzRtwoQs6_Q9hHk2ZSo2sWtIIFGM&language=uk');
+                        $json = file_get_contents('https://maps.googleapis.com/maps/api/place/textsearch/json?query=' . $addressForRequest . '&key=AIzaSyAzxY-YzRtwoQs6_Q9hHk2ZSo2sWtIIFGM');
                         $objectDataAPI = json_decode($json);
                         //mykey               AIzaSyAECoGPJKuBmmc4_Y0PjKkWRLUjheLqwAI
                         //rightkey            AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs

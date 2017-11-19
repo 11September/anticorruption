@@ -827,6 +827,10 @@ span.money-indicator {
     }
 }
 
+.third-col .dropdown-menu .text{
+    white-space: pre-wrap;
+}
+
 /*Help Styles*/
 
 /*Main Adaptive styles*/
@@ -1156,7 +1160,7 @@ span.money-indicator {
     .scroll-part {
         overflow-y: auto;
         width: 100%;
-        height: calc(100vh - 205px - 55px);
+        height: calc(100vh - 212px - 55px);
     }
 
     .second-col {
@@ -1172,7 +1176,7 @@ span.money-indicator {
     }
 
     .map-body, .sidebar-body {
-        height: calc(100vh - 205px);
+        height: calc(100vh - 212px);
     }
 
     .search-body .first-select {

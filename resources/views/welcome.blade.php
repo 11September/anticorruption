@@ -147,7 +147,7 @@
                 });
 
                 google.maps.event.addListener(marker, 'spider_click', function () {
-
+                    console.log('nooooo');
                     var object_id = marker.objectId;
 
                     loadObjectInformation(object_id);

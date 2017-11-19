@@ -284,7 +284,7 @@ class ObjectsController extends Controller
 
                         case 'category':
 
-                            $checkCategory = Category::where( 'name', '=', mb_strtolower( $value ) )->first();
+                            $checkCategory = ObjectCategory::where( 'name', '=', mb_strtolower( $value ) )->first();
                             
                             if( !is_null($checkCategory) ){
                                 $category = $checkCategory;

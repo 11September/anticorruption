@@ -209,29 +209,17 @@ class ObjectsController extends Controller
                 if( !is_null( $exsistObject ) ){
 
                     if( $exsistObject->name == $objectData['name'] ){
-                        $importData[$key]['updateObject'] = $exsistObject->id;
-                    }
 
-                    if( $exsistObject->name !=  $objectData['name'] && !is_null($exsistObject->category) ){
+                        $importData[$key]['updateObject'] = $exsistObject->id;
+
+                    }elseif( $exsistObject->name !=  $objectData['name'] && !is_null($exsistObject->category) ){
+
                         $importData[$key]['updateObject'] = $exsistObject->category->name == $objectData['category'] ? $exsistObject->id : '';
+
                     }
                 }
-
-                // foreach ($objects as $object) {
-
-                //     if ($object->address == $objectData['address'] && $object->name == $objectData['name']) {
-
-                //         
-
-                //     }
-                // }
             }
             // dd($importData);
-
-            $categories = ObjectCategory::all();
-            $customers = Customer::all();
-            $contractors = Contractor::all();
-            $cities = City::all();
             $regions = Region::all();
 
             for ($arrIndex = 0; $arrIndex < count($importData); $arrIndex++) {
@@ -295,40 +283,19 @@ class ObjectsController extends Controller
                     switch ($key) {
 
                         case 'category':
+
+                            $checkCategory = Category::where( 'name', '=', mb_strtolower( $value ) )->first();
                             
-                            if ($categories->count() > 0 && strlen($value) > 0) {
-                                $categoryExist = false;
-                                foreach ($categories as $category) {
-                                    
-                                    if ( $category->name == mb_strtolower( $value ) ) {
-                                        
-                                        $newObjectCategory_id = $category->id;
-                                        $categoryExist = true;
-                                        break;
-
-                                    }
-                                }
-                                
-                                if ($categoryExist === false) {
-                                    
-                                    $newCategory = new ObjectCategory();
-                                    $newCategory->name = $value;
-                                    $newCategory->image = '';
-                                    $newCategory->save();
-
-                                    $newObjectCategory_id = $newCategory->id;
-                                }
-
-                            } elseif (strlen($value) > 0) {
-                                
+                            if( !is_null($checkCategory) ){
+                                $category = $checkCategory;
+                                $newObjectCategory_id = $category->id;
+                            }else{
                                 $newCategory = new ObjectCategory();
                                 $newCategory->name = $value;
                                 $newCategory->image = '';
                                 $newCategory->save();
-
-                                $newObjectCategory_id = $newCategory->id;
-                                
-                            }else{}
+                                $newObjectCategory_id = $category->id;
+                            }
 
                             break;
 
@@ -377,37 +344,17 @@ class ObjectsController extends Controller
 
                         case 'customer':
 
-                            if ($customers->count() > 0 && strlen($value) > 0) {
-                                $customerExist = false;
-                                foreach ($customers as $customer) {
-
-                                    if ($customer->name == $value) {
-
-                                        $newObjectCustomer_id = $customer->id;
-                                        $customerExist = true;
-                                        break;
-
-                                    }
-                                }
-
-                                if ($customerExist === false) {
-
-                                    $newCustomer = new Customer();
-                                    $newCustomer->name = $value;
-                                    $newCustomer->identification_customer = $importData[$arrIndex]['EDRPOU_customer'];
-                                    $newCustomer->save();
-
-                                    $newObjectCustomer_id = $newCustomer->id;
-                                }
-
-                            } elseif (strlen($value) > 0) {
+                            $checkCustomer = Customer::where( 'name', '=', $value )->first();
+                            
+                            if( !is_null($checkCustomer) ){
+                                $customer = $checkCustomer;
+                                $newObjectCustomer_id = $customer->id;
+                            }else{
                                 $newCustomer = new Customer();
                                 $newCustomer->name = $value;
                                 $newCustomer->identification_customer = $importData[$arrIndex]['EDRPOU_customer'];
                                 $newCustomer->save();
-
-                                $newObjectCustomer_id = $newCustomer->id;
-                                break;
+                                $newCustomer = $newCustomer->id;
                             }
 
                             break;
@@ -418,37 +365,17 @@ class ObjectsController extends Controller
 
                         case 'contractor':
 
-                            if ($contractors->count() > 0 && strlen($value) > 0) {
-                                $contractorExist = false;
-                                foreach ($contractors as $contractor) {
-
-                                    if ($contractor->name == $value) {
-
-                                        $newObjectContractor_id = $contractor->id;
-                                        $contractorExist = true;
-                                        break;
-                                    }
-                                }
-
-                                if ($contractorExist === false) {
-
-                                    $newContractor = new Contractor();
-                                    $newContractor->name = $value;
-                                    $newContractor->identification_contractor = $importData[$arrIndex]['EDRPOU_contractor'];
-                                    $newContractor->save();
-
-                                    $newObjectContractor_id = $newContractor->id;
-                                }
-
-                            } elseif (strlen($value) > 0) {
-
+                            $checkContractor = Contractor::where( 'name', '=', $value )->first();
+                            
+                            if( !is_null($checkContractor) ){
+                                $contractor = $checkContractor;
+                                $newObjectContractor_id = $contractor->id;
+                            }else{
                                 $newContractor = new Contractor();
                                 $newContractor->name = $value;
                                 $newContractor->identification_contractor = $importData[$arrIndex]['EDRPOU_contractor'];
                                 $newContractor->save();
-
-                                $newObjectContractor_id = $newContractor->id;
-                                break;
+                                $newContractor = $newContractor->id;
                             }
 
                             break;
@@ -471,39 +398,18 @@ class ObjectsController extends Controller
 
                         case 'city':
 
-                            if ($cities->count() > 0 && strlen($value) > 0) {
-                                $cityExist = false;
-                                foreach ($cities as $city) {
-
-                                    if ($city->name == $value) {
-
-                                        $apiCityName = $city->name;
-                                        $newObjectCity_id = $city->id;
-                                        $cityExist = true;
-                                        break;
-                                    }
-                                }
-
-                                if ($cityExist === false) {
-
-                                    $newCity = new City();
-                                    $newCity->name = $value;
-                                    $newCity->save();
-
-                                    $apiCityName = $newCity->name;
-                                    $newObjectCity_id = $newCity->id;
-                                }
-
-                            } elseif (strlen($value) > 0) {
-
+                            $checkCity = City::where( 'name', '=', $value )->first();
+                            
+                            if( !is_null($checkCity) ){
+                                $city = $checkCity;
+                                $newObjectCity_id = $city->id;
+                                $apiCityName = $city->name;
+                            }else{
                                 $newCity = new City();
                                 $newCity->name = $value;
                                 $newCity->save();
-
-                                $apiCityName = $newCity->name;
-
                                 $newObjectCity_id = $newCity->id;
-
+                                $apiCityName = $city->name;
                             }
 
                             break;

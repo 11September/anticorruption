@@ -135,10 +135,10 @@
 @stop
 
 @section('javascript')
-
-        <script  defer
-                 src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs&callback=initMap&language=uk&libraries=places">
-        </script>
+    
+    <script  defer
+             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs&callback=initMap&language=uk&libraries=places">
+    </script>
 
     <script>
         var params = {}
@@ -185,7 +185,7 @@
                         && response.data
                         && response.data.status
                         && response.data.status == 200 ) {
-
+                        
                         toastr.success(response.data.message);
                         $image.parent().fadeOut(300, function() { $(this).remove(); })
                     } else {

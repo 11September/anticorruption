@@ -70,13 +70,25 @@
                                     @if($loop->index == 10)
                                         @break
                                     @endif
+
                                     <span class="list-item-flex">
                                         <input class="hiidenIdObject" type="hidden" value="{{ $object->id }}">
                                         <img class="image" src="{{ asset('storage' . DIRECTORY_SEPARATOR  . $object->category->image) }}" alt="">
                                         <div class="object-info">
                                             <span class="object-info-p">{{ $object->name }}</span>
                                             <span class="object-info-p">{{ $object->address }}</span>
-                                            <span class="object-info-p">{{ "Cплачено " . floor($object->price/1000) . " тис. грн." }}</span>
+                                            <span class="object-info-p">
+                                            @if($object->price < 1000000)
+                                                {{ floor($object->price / 1000) . " тис." }}
+                                            @elseif($object->price < 1000000000)
+                                                {{ floor($object->price / 1000000) . " млн." }}
+                                            @elseif($object->price < 1000000000000)
+                                                {{ floor($object->price / 1000000000) . " млрд." }}
+                                            @else
+                                                Більше трильйона
+                                            @endif
+
+                                            </span>
                                             <span class="hide lat">{{ $object->maps_lat }}</span>
                                             <span class="hide lng">{{ $object->maps_lng }}</span>
                                         </div>

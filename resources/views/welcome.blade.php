@@ -451,7 +451,7 @@
             }
         }
 
-        function setMoneyIndicator( _moneysAmount ) {
+        function formatPrice( _moneysAmount ) { //setMoneyIndicator
             var moneyPrefix = '', moneysAmountFormatted;
             if(_moneysAmount< 1000000){
                 moneysAmountFormatted = parseInt(_moneysAmount/ 1000);
@@ -466,7 +466,7 @@
                 moneysAmountFormatted = 'Більше трильйона';
             }
 
-            $(".money-indicator").text(moneysAmountFormatted + moneyPrefix);
+            return moneysAmountFormatted + moneyPrefix;
         }
 
         function hideInfo() {
@@ -478,7 +478,8 @@
 
             $('.pagination-links-div').removeClass('hide');
 
-            setMoneyIndicator( moneysAmount );
+            var indicatorPrice = formatPrice( moneysAmount );
+            $(".money-indicator").text(indicatorPrice);
 
             sidebarObjectsAmount($('.disabled-link').text());
         }
@@ -496,7 +497,6 @@
 
             for (var i = 0; i < amount; i++) {
 
-                var formattedPrice = parseInt(objects[i].price / 1000);
                 var objectImage = objects[i].category.image ? objects[i].category.image : "{{ asset('img/markers/cluster.png') }}";
 
                 $("#object-all-list").append(
@@ -506,7 +506,7 @@
                     '<div class="object-info">' +
                     '<span class="object-info-p">' + objects[i].name + '</span>' +
                     '<span class="object-info-p">' + objects[i].address + '</span>' +
-                    '<span class="object-info-p">Сплачено ' + formattedPrice + ' тис. грн.</span>' +
+                    '<span class="object-info-p">Сплачено ' + formatPrice(objects[i].price) +'</span>' +
                     '<span class="hide lat">' + objects[i].maps_lat + '</span>' +
                     '<span class="hide lng">' + objects[i].maps_lng + '</span>' +
                     '</div>' +
@@ -530,7 +530,8 @@
                     $('#comments-part').empty();
                     $('#object-all-list').empty();
 
-                    setMoneyIndicator( parseInt(object[0].price) );
+                    var indicatorPrice = formatPrice( object[0].price );
+                    $(".money-indicator").text(indicatorPrice);
 
                     if ('name' in object[0]) {
                         $('#object-one-list').append(
@@ -720,8 +721,8 @@
                 $("#slider-range").slider({
                     range: true,
                     min: 0,
-                    max: 1000000,
-                    values: [{{ isset($_POST['price_from']) ? $_POST['price_from'] : 0 }},{{ isset($_POST['price_to']) ? $_POST['price_to'] : 700000 }}],
+                    max: 100000000,
+                    values: [{{ isset($_POST['price_from']) ? $_POST['price_from'] : 0 }},{{ isset($_POST['price_to']) ? $_POST['price_to'] : 100000000 }}],
                     slide: function (event, ui) {
                         $("#amount-one").val(ui.values[0]);
                         $("#amount-two").val(ui.values[1]);

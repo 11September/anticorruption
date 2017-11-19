@@ -146,8 +146,11 @@
                     cluster: false,
                 });
 
+                oms.addMarker(marker);
+                marker.setMap(null);
+
                 google.maps.event.addListener(marker, 'spider_click', function () {
-                    console.log('nooooo');
+                    
                     var object_id = marker.objectId;
 
                     loadObjectInformation(object_id);
@@ -368,6 +371,7 @@
 
                 while( markers[index] ){
                     var marker = markers[index];
+                    marker.setMap(null);
                     index++;
                     marker.cluster = false;
                     if( isMarkerInViewport(marker) ){

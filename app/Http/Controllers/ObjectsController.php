@@ -440,7 +440,7 @@ class ObjectsController extends Controller
                                 $newObjectMaps_lat = '';
 
                             } else {
-                                dump($objectDataAPI);
+                                
                                 $newObjectMaps_lat = $objectDataAPI->results[0]->geometry->location->lat;
                                 $newObjectMaps_lng = $objectDataAPI->results[0]->geometry->location->lng;
 

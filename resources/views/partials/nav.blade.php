@@ -123,10 +123,10 @@
                                         <span class="summ-inputs">
                                             <input value="" name="price_from" type="number" class="form-control"
                                                    id="amount-one"
-                                                   placeholder="10 000">
+                                                   placeholder="0">
                                             <input value="" name="price_to" type="number" class="form-control"
                                                    id="amount-two"
-                                                   placeholder="70 000">
+                                                   placeholder="100000000">
                                         </span>
                                         <label for="exampleInputName2" class="label-hrn">&#8372;</label>
 

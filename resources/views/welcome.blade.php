@@ -627,11 +627,11 @@
                         );
                     }
 
-                    if ('finished_year' in object[0]) {
+                    if ('finished_at' in object[0]) {
                         $('#object-one-list').append(
                             '<li>' +
-                            '<p class="object-name">Рік Закінчення Робіт</p>' +
-                            '<p id="object-contractor" class="object-description">' + object[0]['finished_year'] + '</p>' +
+                            '<p class="object-name">Дата завершення робіт</p>' +
+                            '<p id="object-contractor" class="object-description">' + object[0]['finished_at'] + '</p>' +
                             '</li>'
                         );
                     }

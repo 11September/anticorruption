@@ -72,7 +72,7 @@ class ObjectsController extends Controller
         $ids = array();
         $ids = $objects->pluck('id');
         $ids->toArray();
-
+        
         $suma = Object::sumaRepairs($ids);
 
         $regions = collect(Object::distinct('region_id')->pluck('region_id'));

@@ -134,7 +134,7 @@ class Object extends Model
     {
         return static::select('finished_at')->get()
             ->groupBy(function ($date) {
-                dump($date->finished_at);
+
                 return Carbon::parse($date->finished_at)->format('Y');
             });
     }
@@ -145,7 +145,7 @@ class Object extends Model
         return $results;
     }
 
-    public static function sumaRepairs($data)
+    public static function sumaRepairs($ids)
     {
         // $suma = Object::select(DB::raw("SUM(price) as suma"))
         //     ->whereIn('id', $data)
@@ -155,8 +155,8 @@ class Object extends Model
         // $suma = array_column($suma, 'suma');
 
         // $total_suma = (integer)$suma[0];
-
-        $total_suma = (string)static::select('price')->get()->sum('price');
+        
+        $total_suma = (string)static::select('price')->whereIn('id', $ids)->get()->sum('price');
         
         return $total_suma;
     }

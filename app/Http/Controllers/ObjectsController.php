@@ -24,10 +24,12 @@ class ObjectsController extends Controller
     public function index($id = "")
     {   
 
-        if( $id ){
-            $facebookObject = Object::findOrFail($id);
-        }
+        // if( $id ){
+        //     $facebookObject = Object::findOrFail($id);
+        // }
 
+        $facebookObject = $id ? $facebookObject = Object::findOrFail($id) : 'undefined';
+            
         $objects = Object::selected()->with(
             array(
                 'category' => function ($query) {
@@ -103,7 +105,7 @@ class ObjectsController extends Controller
 
     public function importObjectsDatabase(Request $request)
     {
-        try {
+        // try {
 
             $mapKeysCsv = ['category',
                 'name',
@@ -524,23 +526,22 @@ class ObjectsController extends Controller
                             ['title', '=', $newObjectName],
                             ['file_path', '=', $newDocumentFile_path]
                         ])->first();
-                        dump($checkDocument);
-                        dump(is_null($checkDocument));
-                        dump(!is_null($checkDocument));
-                        if ( !is_null($checkDocument) ) {
+
+                        if ( is_null($checkDocument) ) {
+                            
                             $newDocument = new Document();
                             $newDocument->title = $newObjectName;
                             $newDocument->file_path = $newDocumentFile_path;
                             $newDocument->object_id = $object->id;
                             $newDocument->save();
                         }else{
-
+                            
                             $newDocument = $checkDocument;
 
                             $newDocument->title = $newObjectName;
                             $newDocument->file_path = $newDocumentFile_path;
-                            $newFinance->object_id = $object->id;
-                            $newFinance->save();
+                            $newDocument->object_id = $object->id;
+                            $newDocument->save();
                         }
                     }
 
@@ -548,9 +549,9 @@ class ObjectsController extends Controller
                         $checkFinance = Finance::where([
                             ['object_id', '=', $object->id],
                             ['description', '=', $newObjectWork_description]
-                        ])->get();
-
-                        if( !is_null( $checkFinance ) ){
+                        ])->first();
+                        
+                        if( is_null( $checkFinance ) ){
                             $newFinance = new Finance();
                             
                             $newFinance->suma = $newFinanceSuma;
@@ -561,10 +562,10 @@ class ObjectsController extends Controller
                             $newFinance->save();
                         }else{
                             $newFinance = $checkFinance;
-
+                            
                             $newFinance->suma = $newFinanceSuma;
                             $newFinance->status = 'paid';
-                            $newFinance->description = 'ДОПЛАТА ЗА: ' . $newFinance->description;
+                            $newFinance->description = 'ДОПЛАТА ЗА: ' . $checkFinance->description;
                             $newFinance->date = $newFinanceDate;
                             $newFinance->object_id = $object->id;
                             $newFinance->save();
@@ -575,12 +576,12 @@ class ObjectsController extends Controller
             
             Storage::delete('/import/import.csv');
             // dd('yeee');
-        } catch (Exception $exception) {
-            return redirect()->back()->with([
-                'message' => 'Не вдалося імпортувати інформацію (перевірте CSV файл)' . $exception->getMessage() . ': ' . $exception->getLine(),
-                'alert-type' => 'error',
-            ]);
-        }
+        // } catch (Exception $exception) {
+        //     return redirect()->back()->with([
+        //         'message' => 'Не вдалося імпортувати інформацію (перевірте CSV файл)' . $exception->getMessage() . ': ' . $exception->getLine(),
+        //         'alert-type' => 'error',
+        //     ]);
+        // }
 
         $alertType = 'success';
 

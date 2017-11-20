@@ -11,7 +11,7 @@
 @section('facebookCommentsModerator')
 
 {{--    <meta property="og:url" content="{{ env('APP_URL') .'get-object-facebook/'. $object->id }}" /> --}}
-    @if( isset( $facebookObject ) )
+    @if( $facebookObject !== 'undefined' )
         <meta property="og:url" content="{{ env('APP_URL') .'$facebookObject->id/' }}" />
         <meta property="og:title" content="{{ $facebookObject->name . " - " . $facebookObject->address }}" />
         <meta property="og:description" content="{{ $facebookObject->description }}" />
@@ -96,6 +96,7 @@
                 mapCenter = new google.maps.LatLng(objects[0].maps_lat, objects[0].maps_lng);
                 loadObjectInformation(objects[0].id);
             }
+
             if( facebookObject ){
                 mapZoom = 20;
                 mapCenter = new google.maps.LatLng(facebookObject.maps_lat, facebookObject.maps_lng);

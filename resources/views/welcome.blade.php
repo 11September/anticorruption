@@ -600,15 +600,13 @@
 
                         });
                     }
-                    var objectSum = 0;
+
                     var status = 'Сплачено';
 
                     $('#object-one-list').append('<li class="finances-part"><p class="object-name">Фiнансування</p></li>');
 
                     if( 'finances' in object[0] && object[0].finances.length > 0) {
                         $.each(object[0].finances, function( i, objectFin ) {
-                        
-                            objectSum += objectFin.suma;
                         
                             if(objectFin.status == "paid"){
                                 status = 'Сплачено';
@@ -619,7 +617,7 @@
                             else {
                             }
                             $('.finances-part').append(
-                                '<p class="object-description">' + objectSum + ' грн. ' + status + '</p>'
+                                '<p class="object-description">' + objectFin.suma + ' грн. ' + status + '</p>'
                             );
                         });
                     } else if( 'price' in  object[0] ) {

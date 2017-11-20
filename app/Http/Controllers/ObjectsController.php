@@ -64,7 +64,7 @@ class ObjectsController extends Controller
 
     public function filter(Request $request)
     {
-        $objectsBuilder = Object::filter($request->all())->with('category', 'region', 'finances');
+        $objectsBuilder = Object::filter($request->all())->with('category', 'region');
         $objects = $objectsBuilder->get();
 
         $filteredByCity = $request->city_id ? 'true' : 'false';
@@ -72,7 +72,7 @@ class ObjectsController extends Controller
         $ids = array();
         $ids = $objects->pluck('id');
         $ids->toArray();
-        
+
         $suma = Object::sumaRepairs($ids);
 
         $regions = collect(Object::distinct('region_id')->pluck('region_id'));
@@ -80,7 +80,7 @@ class ObjectsController extends Controller
         $regionClustersCoords = [];
 
         foreach ($regions as $regionId) {
-            $count = $objectsBuilder->where( "region_id", "=", $regionId )->whereNotNull('maps_lat')->whereNotNull('maps_lng')->count();
+            $count = Object::where( "region_id", "=", $regionId )->whereIn('id', $ids )->whereNotNull('maps_lat')->whereNotNull('maps_lng')->count();
             if( $count > 0 ){
                 $regionContainsObjectsAmount[$regionId] = $count;
                 $regionClustersCoords[$regionId] = Region::select('map_lat','map_lng')->where('id', $regionId)->get()->toArray();
@@ -296,7 +296,7 @@ class ObjectsController extends Controller
                                 $newCategory->name = $value;
                                 $newCategory->image = '';
                                 $newCategory->save();
-                                $newObjectCategory_id = $category->id;
+                                $newObjectCategory_id = $newCategory->id;
                             }
 
                             break;
@@ -319,7 +319,7 @@ class ObjectsController extends Controller
                             if (strlen($value) > 0) {
                                 $newFinanceSuma = $value;
                                 $newFinanceStatus = 'provided';
-                                $newFinanceDescription = '';
+                                $newFinanceDescription = ''; 
                                 $newFinanceDate = $objectData['object_date_creation'];
                             }
 
@@ -524,7 +524,7 @@ class ObjectsController extends Controller
                             ['title', '=', $newObjectName],
                             ['file_path', '=', $newDocumentFile_path]
                         ])->first();
-
+                        dump($checkDocument);
                         if ( !is_null($checkDocument) ) {
                             $newDocument = new Document();
                             $newDocument->title = $newObjectName;
@@ -532,6 +532,7 @@ class ObjectsController extends Controller
                             $newDocument->object_id = $object->id;
                             $newDocument->save();
                         }else{
+
                             $newDocument = $checkDocument;
 
                             $newDocument->title = $newObjectName;

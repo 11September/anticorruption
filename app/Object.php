@@ -134,6 +134,7 @@ class Object extends Model
     {
         return static::select('finished_at')->get()
             ->groupBy(function ($date) {
+                dump($date->finished_at);
                 return Carbon::parse($date->finished_at)->format('Y');
             });
     }

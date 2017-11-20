@@ -588,7 +588,7 @@
                         $.each(object[0].documents, function( i, objectDoc ) {
 
                             $('.document-part').append(
-                                '<a target="_blank" href="' + objectDoc.file_path + '"></a>'
+                                '<p><a target="_blank" href="' + objectDoc.file_path + '">' + objectDoc.file_path + '</a></p>'
                             );
 
                         });

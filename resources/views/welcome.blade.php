@@ -75,6 +75,7 @@
         var regionContainsObjectsAmount = {!! $regionContainsObjectsAmount !!};
         var moneysAmount = {!! $suma !!};
         var filteredByCity = {!! $filteredByCity !!};
+        var facebookObject = {!! $facebookObject !!};
 
         function initMap() {
 
@@ -94,6 +95,11 @@
                 mapZoom = 18;
                 mapCenter = new google.maps.LatLng(objects[0].maps_lat, objects[0].maps_lng);
                 loadObjectInformation(objects[0].id);
+            }
+            if( facebookObject ){
+                mapZoom = 20;
+                mapCenter = new google.maps.LatLng(facebookObject.maps_lat, facebookObject.maps_lng);
+                loadObjectInformation(facebookObject.id);
             }
 
             map = new google.maps.Map(document.getElementById('map'), {

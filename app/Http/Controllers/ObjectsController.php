@@ -525,6 +525,8 @@ class ObjectsController extends Controller
                             ['file_path', '=', $newDocumentFile_path]
                         ])->first();
                         dump($checkDocument);
+                        dump(is_null($checkDocument));
+                        dump(!is_null($checkDocument));
                         if ( !is_null($checkDocument) ) {
                             $newDocument = new Document();
                             $newDocument->title = $newObjectName;

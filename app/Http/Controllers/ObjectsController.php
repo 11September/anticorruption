@@ -93,7 +93,9 @@ class ObjectsController extends Controller
         $regionClustersCoords = collect( $regionClustersCoords );
         $regionContainsObjectsAmount = collect( $regionContainsObjectsAmount );
 
-        return view('welcome', compact('objects', 'suma', 'regionContainsObjectsAmount', 'filteredByCity', 'regionClustersCoords'));
+        $facebookObject = 'undefined';
+
+        return view('welcome', compact('objects', 'suma', 'regionContainsObjectsAmount', 'filteredByCity', 'regionClustersCoords', 'facebookObject'));
     }
 
     public function show(Request $request)

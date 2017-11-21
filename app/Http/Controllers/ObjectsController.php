@@ -145,11 +145,11 @@ class ObjectsController extends Controller
                 ]);
 
             if ($validator->fails()) {
-                $alerMessage = '';
+                $alertMessage = '';
                 foreach ($validator->messages()->all() as $message) {
-                    $alerMessage = ' ' . $alerMessage . $message . ' ';
+                    $alertMessage = ' ' . $alertMessage . $message . ' ';
                 }
-                throw new Exception($alerMessage);
+                throw new Exception($alertMessage);
             }
 
             $path = $request->file->storeAs('import', 'import.csv');
@@ -229,6 +229,7 @@ class ObjectsController extends Controller
             for ($arrIndex = 0; $arrIndex < count($importData); $arrIndex++) {
 
                 $googleApiZeroResultException = false;
+                $googleApiUnexpectedResultException = false;
 
                 $objectData = $importData[$arrIndex];
 
@@ -444,10 +445,13 @@ class ObjectsController extends Controller
                                 $newObjectMaps_lat = '';
 
                             } else {
-                                    
-                                $newObjectMaps_lat = $objectDataAPI->results[0]->geometry->location->lat;
-                                $newObjectMaps_lng = $objectDataAPI->results[0]->geometry->location->lng;
-
+                                if( $objectDataAPI->status === 'OK' ){    
+                                    $newObjectMaps_lat = $objectDataAPI->results[0]->geometry->location->lat;
+                                    $newObjectMaps_lng = $objectDataAPI->results[0]->geometry->location->lng;
+                                }else{
+                                    $googleApiUnexpectedResultException = true;
+                                    $googleStatusUnexpected = $objectDataAPI->status;
+                                }
                             }
 
                             break;
@@ -474,7 +478,7 @@ class ObjectsController extends Controller
                     }
                 }
 
-                if (!$googleApiZeroResultException) {
+                if (!$googleApiZeroResultException || !$googleApiUnexpectedResultException) {
 
                     $checkObject = Object::where( 'address', '=', $newObjectAddress )->with('category')->first();
 
@@ -589,9 +593,13 @@ class ObjectsController extends Controller
 
         $googleApiLimitMessage = $googleApiLimitException ? ' Перевищено ліміт запитів до Google API деякі об\'єкти імпортовані без кооринат' : '';
         $googleApiZeroResultMessage = strlen($queryZeroExceptionAdreses) > 0 ? ' Google API не знайшло об\'єкти: ' : '';
+        $googleApiUnexpectedResultException = $googleApiUnexpectedResultException ? $googleStatusUnexpected : '';
 
         if (strlen($queryZeroExceptionAdreses) > 0 || $googleApiLimitException) {
             $alertType = 'warning';
+        }
+        if( $googleApiUnexpectedResultException ){
+            $alertType = 'error';
         }
 
         return back()->with([

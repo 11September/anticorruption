@@ -18,8 +18,8 @@
                         {{--<li><a href="page-{{ $page->slug }}">{{ $page->title }}</a></li>--}}
                     {{--@endforeach--}}
 
+                    <li><a href="{{ url('/page-contacts') }}">Контакти</a></li>
                     <li><a href="{{ url('/page-instrukciya') }}">Інструкція</a></li>
-                    <li><a href="{{ url('/page-api') }}">API</a></li>
 
                 </ul>
                 <ul class="nav navbar-nav navbar-right">

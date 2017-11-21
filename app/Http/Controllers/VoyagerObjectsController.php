@@ -215,7 +215,6 @@ class VoyagerObjectsController extends Controller
             $finances->object_id = $object->id;
             $finances->save();
 
-
             return redirect()
                 ->route("voyager.{$dataType->slug}.edit", ['id' => $object->id])
                 ->with([
@@ -327,9 +326,9 @@ class VoyagerObjectsController extends Controller
             $object->save();
 
             $finances = new Finance();
-            $finances->suma = $request->price;
+            $finances->suma = $object->price;
             $finances->status = 'provided';
-            $finances->description = '';
+            $finances->description = $object->work_description;
             $finances->date = Carbon::now()->toDateString();
             $finances->object_id = $object->id;
             $finances->save();

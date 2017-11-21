@@ -486,13 +486,15 @@ class ObjectsController extends Controller
 
                         if( $checkObject->name == $objectData['name'] ){
                             $objectData['updateObject'] = $checkObject->id;
+                            $object = $checkObject;
                         }
 
                         if( $checkObject->name !=  $objectData['name'] && !is_null($checkObject->category) ){
-                            $objectData['updateObject'] = $checkObject->category->name == $objectData['category'] ? $checkObject->id : '';
-                        }
-
-                        $object = $checkObject;
+                            if( $checkObject->category->name == $objectData['category'] ){
+                                $objectData['updateObject'] = $checkObject->id;
+                                $object = $checkObject;
+                            }
+                        }                        
                     }
 
                     $createNewFinance = true;

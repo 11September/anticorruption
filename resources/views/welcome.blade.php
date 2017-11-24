@@ -82,14 +82,14 @@
             var mapZoom = 6;
             var mapCenter = {lat: 49.03806488, lng: 31.4511323};
             
-            var markers, locations = [], center, infoWindows = [], local_markers = [];
+            var markers = [], locations = [], center, infoWindows = [], local_markers = [];
 
-            for (var j = 0; j < objects.length; j++) {
-                locations.push({
-                    lat: parseFloat(objects[j].maps_lat),
-                    lng: parseFloat(objects[j].maps_lng)
-                });
-            }
+            // for (var j = 0; j < objects.length; j++) {
+            //     locations.push({
+            //         lat: parseFloat(objects[j].maps_lat),
+            //         lng: parseFloat(objects[j].maps_lng)
+            //     });
+            // }
 
             if (objects.length == 1) {
                 mapZoom = 18;
@@ -131,10 +131,13 @@
                 });
             }
 
-            markers = locations.map(function (location, i) {
+            $.each(objects, function (i, object) {
+
+                var location = new google.maps.LatLng(object['maps_lat'], object['maps_lng']);
+
                 var objectImage = objects[i].category ? objects[i].category.image : "{{ asset('img/markers/cluster.png') }}";
                 // var objectImage = "{{ asset('img/markers/marker1.png') }}";
-
+                
                 var image = new google.maps.MarkerImage(
                     pathToImages + "/" + objectImage,
                     // objectImage,
@@ -177,7 +180,7 @@
 
                 });
 
-                return marker;
+                markers.push(marker);
             });
 
             var markersInCluster = [];
@@ -272,12 +275,12 @@
                     var bl = new google.maps.LatLng(_marker.getPosition().lat(), _marker.getPosition().lng());
 
                     var trPix = projection.fromLatLngToDivPixel(tr);
-                    trPix.x += 60;
-                    trPix.y -= 60;
+                    trPix.x += 80;
+                    trPix.y -= 80;
 
                     var blPix = projection.fromLatLngToDivPixel(bl);
-                    blPix.x -= 60;
-                    blPix.y += 60;
+                    blPix.x -= 80;
+                    blPix.y += 80;
 
                     var ne = projection.fromDivPixelToLatLng(trPix);
                     var sw = projection.fromDivPixelToLatLng(blPix);

@@ -107,7 +107,7 @@ class ObjectsController extends Controller
 
     public function importObjectsDatabase(Request $request)
     {
-        // try {
+        try {
 
             $mapKeysCsv = ['category',
                 'name',
@@ -177,6 +177,11 @@ class ObjectsController extends Controller
                             array_push($rowData, str_replace('i', 'і', $value));
                         }
                         $objectData = array_combine($keys, $rowData);
+                        foreach ($mapKeysCsv as $exploredKey) {
+                            if (!array_key_exists($exploredKey, $objectData)) {
+                                throw new Exception('Ключ "' . $exploredKey . '" не валідний у CSV файлі перевірте імпортований документ та його кодування');
+                            }
+                        }
                     }
 
                     if (!empty($objectData)) {
@@ -197,33 +202,9 @@ class ObjectsController extends Controller
             // var_dump($a[0]->name);
             // var_dump('ДИТЯЧА КЛIНIЧНА ЛІКАРНЯ №4');
             // dump($a[0]->name === 'ДИТЯЧА КЛIНIЧНА ЛІКАРНЯ №4');
-            // dd($a);
-            foreach ($importData as $key => $objectData) {
-
-                foreach ($mapKeysCsv as $exploredKey) {
-                    if (!array_key_exists($exploredKey, $objectData)) {
-                        throw new Exception('Ключ "' . $exploredKey . '" не валідна у CSV перевірте імпортований файл та його кодування');
-                    }
-                }
-
-                $importData[$key]['updateObject'] = '';
-
-                $exsistObject = Object::where( 'address', '=', $objectData['address'] )->with('category')->first();
-                
-                if( !is_null( $exsistObject ) ){
-
-                    if( $exsistObject->name == $objectData['name'] ){
-
-                        $importData[$key]['updateObject'] = $exsistObject->id;
-
-                    }elseif( $exsistObject->name !=  $objectData['name'] && !is_null($exsistObject->category) ){
-
-                        $importData[$key]['updateObject'] = $exsistObject->category->name == $objectData['category'] ? $exsistObject->id : '';
-
-                    }
-                }
-            }
+            // dd($a);            
             // dd($importData);
+
             $regions = Region::all();
 
             for ($arrIndex = 0; $arrIndex < count($importData); $arrIndex++) {
@@ -232,14 +213,6 @@ class ObjectsController extends Controller
                 $googleApiUnexpectedResultException = false;
 
                 $objectData = $importData[$arrIndex];
-
-                if (strlen($objectData['updateObject']) == 0) {
-                    $object = new Object();
-                }
-
-                if (strlen($objectData['updateObject']) > 0) {
-                    $object = Object::where('id', $objectData['updateObject'])->first();
-                }
 
                 $newObjectName = '';
                 $newObjectAddress = '';
@@ -262,21 +235,32 @@ class ObjectsController extends Controller
                 $financeSuma = '';
                 $newObjectCreateDate = Carbon::now();
 
-                if ($object->address !== $objectData['address'] && strlen($object->lat) < 2 && strlen($object->lng) < 2) {
+                $objectData['updateObject'] = '';
 
-                    if (strlen($objectData['latitude']) < 2 || strlen($objectData['longitude']) < 2) {
+                if (strlen($objectData['latitude']) < 2 || strlen($objectData['longitude']) < 2) {
 
-                        $addressForRequest = str_replace(' ', '+', $importData[$arrIndex]['address']);
-                        $json = file_get_contents('https://maps.googleapis.com/maps/api/place/textsearch/json?key=AIzaSyDQn2uArxofxG0oJWMNDgTxbMc17zWAXnA&query=' . $addressForRequest . '&language=uk');
-                        $objectDataAPI = json_decode($json);
-                        //mykey               AIzaSyAECoGPJKuBmmc4_Y0PjKkWRLUjheLqwAI
-                        //rightkey            AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs
-                        //palces libraty key  AIzaSyAzxY-YzRtwoQs6_Q9hHk2ZSo2sWtIIFGM
-                        //the most right key  AIzaSyDQn2uArxofxG0oJWMNDgTxbMc17zWAXnA
-                        // from google after card verify 
+                    $addressForRequest = str_replace(' ', '+', $objectData['address']);
+
+                    $json = file_get_contents('https://maps.googleapis.com/maps/api/place/textsearch/json?key=AIzaSyDQn2uArxofxG0oJWMNDgTxbMc17zWAXnA&query=' . $addressForRequest . '&language=uk');
+                    $objectDataAPI = json_decode($json);
+
+                    $exsistObject = Object::where( 'address', '=', $objectDataAPI->results[0]->formatted_address )->with('category')->first();
+
+                    if( !is_null( $exsistObject ) && $exsistObject->name == $objectData['name'] && $exsistObject->category->id == $objectData['category'] ){
+                        $objectData['updateObject'] = $exsistObject->id;
                     }
-                } else {
-                    $objectDataAPI = 'COORDINATES_EXIST';
+
+                    //mykey               AIzaSyAECoGPJKuBmmc4_Y0PjKkWRLUjheLqwAI
+                    //rightkey            AIzaSyCylzj30nQuaMwhN6Xeqf7wrSYV7KR0yFs
+                    //palces libraty key  AIzaSyAzxY-YzRtwoQs6_Q9hHk2ZSo2sWtIIFGM
+                    //the most right key  AIzaSyDQn2uArxofxG0oJWMNDgTxbMc17zWAXnA
+                    // from google after card verify 
+                }
+
+                if( strlen( $objectData['updateObject'] ) == 0 ){
+                    $object = new Object();
+                }else{
+                    $object = Object::where('id', $objectData['updateObject'])->first();
                 }
 
                 if (property_exists($objectDataAPI, 'status')) {
@@ -314,8 +298,7 @@ class ObjectsController extends Controller
 
                         case 'address':
 
-                            $newObjectAddress = $value;
-                            $addressForRequest = str_replace(' ', '+', $value);
+                            $newObjectAddress = $objectDataAPI->results[0]->formatted_address;
 
                             break;
 
@@ -584,12 +567,12 @@ class ObjectsController extends Controller
             
             Storage::delete('/import/import.csv');
             // dd('yeee');
-        // } catch (Exception $exception) {
-        //     return redirect()->back()->with([
-        //         'message' => 'Не вдалося імпортувати інформацію (перевірте CSV файл)' . $exception->getMessage() . ': ' . $exception->getLine(),
-        //         'alert-type' => 'error',
-        //     ]);
-        // }
+        } catch (Exception $exception) {
+            return redirect()->back()->with([
+                'message' => 'Не вдалося імпортувати інформацію (перевірте CSV файл)' . $exception->getMessage() . ': ' . $exception->getLine(),
+                'alert-type' => 'error',
+            ]);
+        }
 
         $alertType = 'success';
 

@@ -2,7 +2,7 @@
     $(function () {
         var addresses = [
             @foreach($addresses as $address)
-            '{{ $address }}',
+            "{{ str_replace( '/\\r?\\n|\\r/'    , '', $address ) }}",
             @endforeach
         ];
 
